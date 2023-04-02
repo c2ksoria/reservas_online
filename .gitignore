@@ -1,0 +1,7 @@
+reservas/app/__pycache__/
+reservas/app/migrations/
+reservas/app/static
+reservas/media
+reservas/members/__pycache__/
+reservas/members/migrations/
+reservas/reservas/__pycache__/

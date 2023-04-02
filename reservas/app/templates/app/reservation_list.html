@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% block name %}
+
+    
+
+{% endblock %}
+
+{% block wrapper %}
+
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+  <!-- Content Header (Page header) -->
+  <div class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-4">
+          {% if titulo %}
+          <h1 class="m-0">{{ titulo }}</h1>
+
+          {% endif %}
+          {% if adsAviables > 0 %}
+          
+          <a><p>Puedes Agregar {{adsAviables}} avisos de tipo "Hospedaje"</p></a>
+          
+          {% else %}
+          <a href="/home/plan">Ya no puedes crear más avisos; favor de subir de Plan...</a>
+          {% endif %}
+          
+        </div><!-- /.col -->
+        <div class="row">
+          
+          <a href="./reservations/add"><button class="btn btn-primary">Nueva Reserva</button></a>
+        </div>
+        <div class="col-sm-4 justify-content-end">
+          <!--  -->
+          <!-- <ol class="breadcrumb float-sm-right">
+            <li class="breadcrumb-item"><a href="#">Home</a></li>
+            <li class="breadcrumb-item active">Starter Page</li>
+          </ol> -->
+        </div><!-- /.col -->
+      </div><!-- /.row -->
+    </div><!-- /.container-fluid -->
+  </div>
+  <!-- /.content-header -->
+
+  <!-- Main content -->
+
+
+  <div class="content">
+    <div class="container-fluid">
+      <!-- <h2>Holass1 </h2>
+        <h1>{{ empresa}}</h1> -->
+
+      <div>
+        {% if object_list %}
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Nombre y Apellido</th>
+              <th>Propiedad</th>
+              <th>CheckIn</th>
+              <th>CheckOut</th>
+              <th>Estado</th>
+              <th>Personas</th>
+              <th>Noches</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in object_list%}
+            <tr>
+              <th> <a href="">{{item.nombre_apellido}}</a></th>
+              <th>{{ item.propiedad }}</th>
+              <th>{{ item.fecha_ingreso |date:'d-m-Y'}}</th>
+              <th>{{ item.fecha_egreso|date:'d-m-Y' }}</th>
+              <th>{{ item.estatus }}</th>
+              <th>{{ item.cantidad_personas }}</th>
+              <th>{{ item.cantidad_noches }}</th>
+              
+
+            </tr>
+            {% endfor%}
+        </table>
+
+        {% else %}
+
+        <div class="jumbotron">
+          <h1 class="display-4">No Reservas almacenadas</h1>
+          <p class="lead">Favor de crear una...</p>
+          <hr class="my-4">
+          <p>Crear una reserva para poder asociar pagos a ella</p>
+          
+        </div>
+        {% endif %}
+
+
+        <script>
+          function copy(dato) {
+            var copyText = document.getElementById(dato);
+            var textArea = document.createElement("textarea");
+            textArea.value = copyText.textContent;
+            console.log(textArea.value)
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand("Copy");
+            textArea.remove();
+          }</script>
+
+        {% if items %}
+        {% for item in items %}
+        <h1>
+          {{ item.NombreItem }}
+        </h1>
+        {% endfor%}
+        {% endif %}
+
+        <div>
+          {% for item in object_list%}
+          <H2>{{ item.NombreEmpresa}}</H2>
+          {% endfor %}
+
+          
+
+
+        </div>
+
+      </div>
+      <!-- /.row -->
+    </div><!-- /.container-fluid -->
+  </div>
+  <!-- /.content -->
+</div>
+<!-- /.content-wrapper -->
+{% endblock wrapper %}
