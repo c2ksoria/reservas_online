@@ -1,0 +1,231 @@
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from app.models import Reservation, ReservationStatus, ReservationOrigin, Property, Payments, Commercial
+from .serializers import ReservationSerializer, ReservationSerializer1, PaymentsSerializer, CommercialSerializer
+from rest_framework.response import Response
+import django_filters
+from django_filters import rest_framework as filters
+from django.db.models import Q
+
+from app.views import Estados
+
+from django.shortcuts import render
+from app.forms import CreateFormReservation
+from django.views.decorators.csrf import csrf_protect
+from django.http import JsonResponse
+import json
+
+from rest_framework import generics
+from django.db.models import Sum
+
+from rest_framework import status
+from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse
+from datetime import datetime
+from django.core import serializers
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.pagination import PageNumberPagination
+from django.forms.models import model_to_dict
+
+@api_view(['GET'])
+def getData(request):
+    serializer_context = {
+        'request': request,
+    }
+    reservas = Reservation.objects.all()
+
+    serializer = ReservationSerializer1(
+        reservas, many=True, context=serializer_context)
+
+    return Response(serializer.data)
+
+
+@api_view(['PUT'])
+def changeStatusReservation(request):
+    respuesta = ""
+    Estado_actual = ''
+    objeto_reserva = ''
+    data = request.data
+    print("-------------- data: --------------")
+    print(data)
+    print("-----------------------------------")
+    id_reservation = data['id']
+    print(id_reservation)
+    try:
+        reservas = Reservation.objects.get(id=id_reservation)
+        Estado_actual = reservas.estatus
+        print(Estado_actual.nombre)
+        objeto_reserva = Estados(Estado_actual.nombre)
+        print(objeto_reserva.estado)
+        objeto_reserva.transicion(data['accion'])
+        print(objeto_reserva.estado)
+        #     reservas.estatus.nombre=objeto_reserva.estado
+        status = ReservationStatus.objects.get(nombre=objeto_reserva.estado)
+        print(status.nombre)
+        reservas.estatus = status
+        # print("Estado: nombre: ",reservas.estatus.nombre, "id: ",reservas.estatus.id)
+        reservas.save()
+        # reservas=Reservation.objects.get(id)
+        # Estado_actual= reservas.estatus.nombre
+        print("estado cambiado satisfactoriamente")
+        respuesta = {'Data': {'status': 200,
+                              'nuevoEstado': reservas.estatus.nombre}}
+    except:
+        print("hubo un error en el backend...")
+        respuesta = {'Data': {'status': 500,
+                              'error': 'hubo un error, no se pudo cambiar el estado'}}
+
+    return Response(respuesta)
+
+# def changeStatusReservation(request,pk):
+#     serializer_context = {
+#             'request': request,
+#     }
+#     reservas=Reservation.objects.get(id=pk)
+#     Estado_actual= reservas.estatus.nombre
+#     print(Estado_actual)
+#     objeto_reserva = Estados(Estado_actual)
+#     print(objeto_reserva.estado)
+#     objeto_reserva.transicion('CheckinOk')
+#     print(objeto_reserva.estado)
+#     #     reservas.estatus.nombre=objeto_reserva.estado
+#     status= ReservationStatus.objects.get(id=3)
+#     print(status.nombre)
+#     reservas.estatus= status
+#     print("Estado: nombre: ",reservas.estatus.nombre, "id: ",reservas.estatus.id)
+#     reservas.save()
+#     reservas=Reservation.objects.get(id=pk)
+#     Estado_actual= reservas.estatus.nombre
+
+# #     serializer= ReservationSerializer(reservas, many=False, context=serializer_context)
+#     return Response({'status': 200, 'NuevoEstado': objeto_reserva.estado})
+
+
+
+        # formulario = CreateFormReservation()
+        # return JsonResponse({'form': formulario.as_p()})
+
+class ReservationFilter(django_filters.FilterSet):
+    estatus = django_filters.BaseInFilter(field_name='estatus')
+    nombre_apellido= django_filters.CharFilter(field_name='nombre_apellido', lookup_expr='icontains')
+    propiedad= django_filters.CharFilter(field_name='propiedad__nombre', lookup_expr='icontains')
+    # fecha_ingreso_gte = filters.DateFilter(field_name='fecha_ingreso', lookup_expr='gte')
+    # fecha_ingreso_lte = filters.DateFilter(field_name='fecha_ingreso', lookup_expr='lte')
+    fecha_ingreso = filters.DateFromToRangeFilter(field_name='fecha_ingreso')
+    class Meta:
+        model = Reservation
+        fields = ['propiedad', 'origen_reserva', 'estatus', 'fecha_ingreso', 'fecha_egreso', 'nombre_apellido']
+
+class ReservationList(generics.ListCreateAPIView):
+    queryset = Reservation.objects.all()
+    serializer_class = ReservationSerializer1
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ReservationFilter
+    pagination_class = PageNumberPagination
+    # page_size = 10
+        
+
+class CreateReservation(generics.CreateAPIView):
+        serializer_class = ReservationSerializer
+
+class UpdateReservation(generics.RetrieveUpdateDestroyAPIView):
+        queryset = Reservation.objects.all()
+        serializer_class = ReservationSerializer
+
+class PaymentsList(generics.ListCreateAPIView):
+        queryset = Payments.objects.all()
+        serializer_class = PaymentsSerializer
+        def get_queryset(self,  *args, **kwargs) :
+            return (
+            super()
+            .get_queryset(*args, **kwargs)
+            .filter(reserva=self.kwargs['pk'])
+        )
+
+class CreatePayments(generics.CreateAPIView):
+        serializer_class = PaymentsSerializer
+
+class ListCommercial(generics.ListCreateAPIView):
+    queryset = Commercial.objects.all()
+    serializer_class = CommercialSerializer
+
+@api_view(['GET'])
+def Montos(request):
+    idcomercio = request.GET.get('idCommercial')
+    mes_actual = request.GET.get('idMes')
+    idestatus = request.GET.get('idEstatus')
+    # print(idestatus)
+
+    split = idestatus.split(',')
+    # print (split)
+    # print(split[0], split[1])
+    nombre= Commercial.objects.get(id=idcomercio)
+    
+    totales_pesos=0
+    totales_dolares=0
+    totales_pesos_chilenos=0
+    print("---------------- " + nombre.nombre + "---------------- ")
+
+    # Obtener el mes y año actual
+    # mes_actual = 5
+    año_actual = 2023
+    # print(mes_actual)
+
+    estatus_filtrados = split  # Reemplaza con los estatus que deseas filtrar
+
+    # Construir la consulta utilizando la función Q
+    consulta_estatus = Q()
+    for estatus in estatus_filtrados:
+        consulta_estatus |= Q(estatus__id=estatus)
+    # print(consulta_estatus)
+
+    # estatus_listado = ReservationStatus.objects.filter(Q(id=19) | Q(id=4))
+
+    # print(estatus_listado)
+    # for item in estatus_listado:
+    #     print(item.nombre)
+    # Obtener todas las reservas del mes y año actual
+    reservas = Reservation.objects.filter(consulta_estatus,fecha_ingreso__month=mes_actual, fecha_ingreso__year=año_actual, propiedad__comercio__id=idcomercio)
+    # for item in reservas:
+    #      print(item.id, item.nombre_apellido)
+    
+    reservations_list = [model_to_dict(reservation) for reservation in reservas]
+    # for reservation_dict in reservations_list:
+    #     print(reservation_dict)
+    
+    serialized_data=ReservationSerializer1(reservas, many=True)
+    
+
+    # print (serialized_data.data)
+    # Obtener los IDs de las reservas
+    ids_reservas = reservas.values_list('id', flat=True)
+    # print (ids_reservas)
+    # Filtrar los pagos relacionados con las reservas del mes y año actual
+    pagos = Payments.objects.filter(reserva__id__in=ids_reservas)
+    for item in pagos:
+         print(item.id, item.monto, item.moneda_pago)
+         if (item.moneda_pago=='Pesos'):
+              
+            totales_pesos+=item.monto
+         elif (item.moneda_pago=='Pesos Chilenos'):
+            totales_pesos_chilenos+=item.monto
+         elif (item.moneda_pago=='Dolares'):
+            totales_dolares+=item.monto
+        
+    print("Ingresos en Pesos: ",totales_pesos)
+    print("Ingresos en Dolares: ",totales_dolares)
+    print("Ingresos en Pesos Chileno: ",totales_pesos_chilenos)
+    # # Calcular los ingresos totales por propiedad y comercio
+    # ingresos_propiedad_comercio = pagos.values('reserva__propiedad__nombre', 'reserva__comercio').annotate(total_pagos=Sum('monto'))
+
+    # # Imprimir los resultados
+    # for ingreso in ingresos_propiedad_comercio:
+    #     propiedad = ingreso['reserva__propiedad__nombre']
+    #     comercio = ingreso['reserva__comercio']
+    #     total_pagos = ingreso['total_pagos']
+
+    #     print(f'Propiedad: {propiedad}')
+    #     print(f'Comercio: {comercio}')
+    #     print(f'Total pagos: {total_pagos}')
+    #     print('---')
+    return JsonResponse(serialized_data.data, safe=False)

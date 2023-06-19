@@ -14,7 +14,7 @@ def create_status():
         ('Presupuesto', 'Reserva Presupuestada'),
         ('Activa', 'Reserva Activa'),
         ('En proceso', 'Reserva En Proceso'),
-        ('Finalizada', 'Reserva Finalizada'),
+        ('Checkin', 'Reserva Checkin'),
         ('Suspendida', 'Reserva Suspendida'),
         ('Cancelada', 'Reserva Cancelada'),
     ]
@@ -36,22 +36,22 @@ def create_Reservation_Origin():
         status = ReservationOrigin(nombre=item[0], Detalle=item[1])
         status.save()
 def create_Payment_Type():
-    ORIGEN_RESERVA = [
+    ORIGEN_PAGOS = [
         ('Peso','Pesos Argentinos'),
         ('Dolar', 'Dolares Americanos'),]
-    for item in ORIGEN_RESERVA:
+    for item in ORIGEN_PAGOS:
         print(item[0])
         status = PaymentsType(nombre=item[0], Detalle=item[1])
         status.save()
 
-print("--------- Creando los estados de las reservas ---------")
+# print("--------- Creando los estados de las reservas ---------")
+# try:
+#     create_status()
+# except ValueError as e:
+#     print("Hubo un error...:",e)
+# print("--------- Estados de Reservas creados satisfactoriamente ---------")
+# print("     ----------------    ")
 try:
-    create_status()
-except ValueError as e:
-    print("Hubo un error...:",e)
-print("--------- Estados de Reservas creados satisfactoriamente ---------")
-print("     ----------------    ")
-try:
-    create_Payment_Type()
+    create_Reservation_Origin()
 except ValueError as e:
     print("Hubo un error...:",e)

@@ -2,7 +2,7 @@
 
 {% block name %}
 
-    
+
 
 {% endblock %}
 
@@ -20,16 +20,18 @@
 
           {% endif %}
           {% if adsAviables > 0 %}
-          
-          <a><p>Puedes Agregar {{adsAviables}} avisos de tipo "Hospedaje"</p></a>
-          
+
+          <a>
+            <p>Puedes Agregar {{adsAviables}} avisos de tipo "Hospedaje"</p>
+          </a>
+
           {% else %}
           <a href="/home/plan">Ya no puedes crear más avisos; favor de subir de Plan...</a>
           {% endif %}
-          
+
         </div><!-- /.col -->
         <div class="row">
-          
+
           <a href="./reservations/add"><button class="btn btn-primary">Nueva Reserva</button></a>
         </div>
         <div class="col-sm-4 justify-content-end">
@@ -64,6 +66,8 @@
               <th>Estado</th>
               <th>Personas</th>
               <th>Noches</th>
+              <th>Origen</th>
+              <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -76,7 +80,16 @@
               <th>{{ item.estatus }}</th>
               <th>{{ item.cantidad_personas }}</th>
               <th>{{ item.cantidad_noches }}</th>
-              
+              <th>{{ item.origen_reserva }}</th>
+              {% if item.estatus.nombre == 'Presupuesto' %}
+              <th id="th{{item.id}}">
+                <button type="button" class="btn btn-secondary btn-xs" id="text{{item.id}}"><i
+                  class="bi bi-trash"></i></button>
+                
+                </th>
+                {% endif %}
+
+
 
             </tr>
             {% endfor%}
@@ -89,7 +102,7 @@
           <p class="lead">Favor de crear una...</p>
           <hr class="my-4">
           <p>Crear una reserva para poder asociar pagos a ella</p>
-          
+
         </div>
         {% endif %}
 
@@ -119,7 +132,7 @@
           <H2>{{ item.NombreEmpresa}}</H2>
           {% endfor %}
 
-          
+
 
 
         </div>
@@ -131,4 +144,33 @@
   <!-- /.content -->
 </div>
 <!-- /.content-wrapper -->
+
+<script>
+// Obtén el botón por su ID
+const botonEjemplo = document.getElementById('text1');
+
+// Agrega un escucha de eventos 'click' al botón
+botonEjemplo.addEventListener('click', function() {
+  // Cuando se hace clic en el botón, muestra un mensaje en la consola
+  var $button = $(this);
+  console.log('¡Haz hecho clic en el botón!');
+  const container = document.getElementById("text1");
+  var buttons_div = $button.parent().find(".th1");
+  const button = document.createElement("button");
+  button.innerText = "Haz click aquí";
+// Agregamos un evento click al botón
+button.addEventListener("click", () => {
+console.log("Has hecho click en el botón");
+});
+
+// Agregamos el botón al contenedor
+container.appendChild(button);
+  
+  
+});
+
+
+
+
+</script>
 {% endblock wrapper %}

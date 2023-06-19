@@ -9,14 +9,14 @@ class ReservationOrigin(models.Model):
     nombre = models.CharField(max_length=255)
     Detalle= models.CharField(max_length=255, verbose_name='Detalle')
     def __str__(self):
-        return f"{self.id}_{self.nombre}"
+        return self.nombre
 
 class ReservationStatus(models.Model):
     nombre= models.CharField(max_length=255, verbose_name='Nombre')
     Detalle= models.CharField(max_length=255, verbose_name='Detalle')
     
     def __str__(self):
-        return f"{self.nombre}"
+        return self.nombre
     
 
 class PaymentsType(models.Model):
@@ -24,8 +24,8 @@ class PaymentsType(models.Model):
     detalle= models.CharField(max_length=255, verbose_name='Detalle', null=True)
 
     def __str__(self):
-        return f"{self.id}_{self.nombre}"
-
+        return self.nombre
+    
 class Commercial(models.Model):
     nombre= models.CharField(max_length=255, verbose_name='Nombre')
     direccion= models.CharField(max_length=255, verbose_name='Dirección', null=True)
@@ -36,15 +36,15 @@ class Commercial(models.Model):
 
 
     def __str__(self):
-        return f"{self.id}_{self.nombre}"
+        return self.nombre
     
 class Property(models.Model):
     nombre= models.CharField(max_length=255, verbose_name='Nombre')
-    comercio = models.ForeignKey(Commercial, on_delete=models.SET_DEFAULT, default=1)
+    comercio = models.ForeignKey(Commercial, on_delete=models.CASCADE, null=False)
     detalle= models.CharField(max_length=255, verbose_name='Detalle', null=True)
 
     def __str__(self):
-        return f"{self.nombre}"
+        return self.nombre
     
 
 
@@ -74,7 +74,7 @@ class Reservation(models.Model):
     )
 
     nombre_apellido = models.CharField(max_length=255)
-    estatus = models.ForeignKey(ReservationStatus, on_delete=models.SET_DEFAULT, default=1)
+    estatus = models.ForeignKey(ReservationStatus, on_delete=models.CASCADE, related_name='estado', null=False, default=1)
     fecha_ingreso = models.DateField()
     hora_checkin = models.TimeField()
     fecha_egreso = models.DateField()
@@ -85,9 +85,9 @@ class Reservation(models.Model):
     presupuesto_dolares = models.DecimalField(max_digits=10, decimal_places=2)
     presupuesto_pesos = models.DecimalField(max_digits=10, decimal_places=2)
     notas = models.TextField(blank=True)
-    origen_reserva = models.ForeignKey(ReservationOrigin, on_delete=models.CASCADE, default=1)
-    propiedad = models.ForeignKey(Property, on_delete=models.CASCADE, default=1)
-
+    origen_reserva = models.ForeignKey(ReservationOrigin, on_delete=models.CASCADE,null=True,blank=True,default=None)
+    propiedad = models.ForeignKey(Property, on_delete=models.CASCADE, null=True)
+    # cochera= models.BooleanField(default=False)
     def clean(self):
         # Validar que la fecha de ingreso sea anterior a la de egreso
             
@@ -106,15 +106,20 @@ class Reservation(models.Model):
         # Calcular la cantidad de noches
         self.cantidad_noches = (self.fecha_egreso - self.fecha_ingreso).days
         super().save(*args, **kwargs)
+    class Meta():
+        verbose_name = "Reserva"
+        verbose_name_plural = "Reservas"
+
 
     def __str__(self):
-        return f"{self.nombre_apellido}_{self.fecha_ingreso}"
+        return self.nombre_apellido
 
 class Payments(models.Model):
 
     MONEDA_PAGO = (
         ('Pesos', 'Pesos Argentinos'),
-        ('Dolares', 'Dolares Americanos')
+        ('Dolares', 'Dolares Americanos'),
+        ('Pesos Chilenos', 'Pesos Chilenos')
     )   
 
     TIPO_PAGO=(
@@ -122,22 +127,22 @@ class Payments(models.Model):
         ('Transferencia', 'Transferencia a Cuenta Digital'),
     )
 
+    reserva= models.ForeignKey(Reservation, on_delete=models.CASCADE)
     fecha_pago=models.DateField(default=None)
     moneda_pago = models.CharField(choices=MONEDA_PAGO, max_length=255)  
     tipo_pago = models.CharField(choices=TIPO_PAGO, max_length=255)  
     monto = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    comprobante = models.ImageField(upload_to='images/', null=True, blank=True)
+    comprobante = models.ImageField(upload_to='receipt/', null=True, blank=True)
     verif_propietario=models.BooleanField(null=False, verbose_name='Verificado', default=False)
     fecha_verificacion=models.DateField(null=True, blank=True)
-    reserva= models.ForeignKey(Reservation, on_delete=models.SET_DEFAULT, default=0)
     def __str__(self):
-        return f"{self.id}_{self.fecha_pago}"
+        return self.fecha_pago
     
     class Meta:
         verbose_name_plural = 'Pagos'
 
 class Totals(models.Model):
-    reserva=models.ForeignKey(Reservation, on_delete=models.SET_DEFAULT, default=0)
+    reserva=models.ForeignKey(Reservation, on_delete=models.CASCADE , null=False)
     monto_pesos=models.DecimalField(max_digits=10, decimal_places=2, default=0)
     monto_dolares=models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
