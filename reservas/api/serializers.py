@@ -58,10 +58,18 @@ class ReservationSerializer(serializers.ModelSerializer):
         return super().validate(data)
              
     
+class PaymentsSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = Payments
+        fields = '__all__'
+        # exclude= ('comprobante',)
+
 class ReservationSerializer1(serializers.ModelSerializer):
     estatus = ReservationStatusSerializer(read_only=True)
     origen_reserva = ReservationOriginSerializer(read_only=True)
     propiedad = ReservationOriginSerializer(read_only=True)
+    pagos = PaymentsSerializer(many=True, read_only=True)
 
     # estatus = serializers.PrimaryKeyRelatedField(read_only=True)
     # origen_reserva = serializers.PrimaryKeyRelatedField(read_only=True)
@@ -71,11 +79,6 @@ class ReservationSerializer1(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class PaymentsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Payments
-        fields = '__all__'
-        # exclude= ('comprobante',)
 
 class CommercialSerializer(serializers.ModelSerializer):
     class Meta:

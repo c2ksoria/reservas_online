@@ -127,7 +127,7 @@ class Payments(models.Model):
         ('Transferencia', 'Transferencia a Cuenta Digital'),
     )
 
-    reserva= models.ForeignKey(Reservation, on_delete=models.CASCADE)
+    reserva= models.ForeignKey(Reservation, on_delete=models.CASCADE, related_name='pagos')
     fecha_pago=models.DateField(default=None)
     moneda_pago = models.CharField(choices=MONEDA_PAGO, max_length=255)  
     tipo_pago = models.CharField(choices=TIPO_PAGO, max_length=255)  

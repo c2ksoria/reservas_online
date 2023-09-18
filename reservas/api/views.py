@@ -109,12 +109,19 @@ class ReservationFilter(django_filters.FilterSet):
     estatus = django_filters.BaseInFilter(field_name='estatus')
     nombre_apellido= django_filters.CharFilter(field_name='nombre_apellido', lookup_expr='icontains')
     propiedad= django_filters.CharFilter(field_name='propiedad__nombre', lookup_expr='icontains')
-    # fecha_ingreso_gte = filters.DateFilter(field_name='fecha_ingreso', lookup_expr='gte')
-    # fecha_ingreso_lte = filters.DateFilter(field_name='fecha_ingreso', lookup_expr='lte')
+    fecha_ingreso_gte = filters.DateFilter(field_name='fecha_ingreso', lookup_expr='gte')
+    fecha_ingreso_lte = filters.DateFilter(field_name='fecha_ingreso', lookup_expr='lte')
     fecha_ingreso = filters.DateFromToRangeFilter(field_name='fecha_ingreso')
+    # mes_en_curso = django_filters.NumberFilter(field_name='date__month', lookup_expr='exact')
+
     class Meta:
         model = Reservation
-        fields = ['propiedad', 'origen_reserva', 'estatus', 'fecha_ingreso', 'fecha_egreso', 'nombre_apellido']
+        fields = ['propiedad', 'origen_reserva', 'estatus', 'fecha_ingreso', 'fecha_egreso', 'nombre_apellido', 'fecha_ingreso_gte', 'fecha_ingreso_lte']
+
+class CustomPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
 
 class ReservationList(generics.ListCreateAPIView):
     queryset = Reservation.objects.all()
@@ -122,8 +129,16 @@ class ReservationList(generics.ListCreateAPIView):
     filter_backends = [DjangoFilterBackend]
     filterset_class = ReservationFilter
     pagination_class = PageNumberPagination
-    # page_size = 10
+    # pagination_class = CustomPagination
+    # page_size = 5
         
+class ReservationListPagination(generics.ListCreateAPIView):
+    queryset = Reservation.objects.all()
+    serializer_class = ReservationSerializer1
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ReservationFilter
+    pagination_class = CustomPagination
+    # page_size = 5
 
 class CreateReservation(generics.CreateAPIView):
         serializer_class = ReservationSerializer
@@ -185,36 +200,36 @@ def Montos(request):
     # for item in estatus_listado:
     #     print(item.nombre)
     # Obtener todas las reservas del mes y año actual
-    reservas = Reservation.objects.filter(consulta_estatus,fecha_ingreso__month=mes_actual, fecha_ingreso__year=año_actual, propiedad__comercio__id=idcomercio)
+    reservas = Reservation.objects.filter(consulta_estatus,fecha_ingreso__month=mes_actual, fecha_ingreso__year=año_actual, propiedad__comercio__id=idcomercio).prefetch_related('pagos')
     # for item in reservas:
-    #      print(item.id, item.nombre_apellido)
+    #      print(item.id)
     
     reservations_list = [model_to_dict(reservation) for reservation in reservas]
     # for reservation_dict in reservations_list:
     #     print(reservation_dict)
     
-    serialized_data=ReservationSerializer1(reservas, many=True)
-    
-
-    # print (serialized_data.data)
+    serialized_data=ReservationSerializer1(reservas, many=True).data
+    # for item in serialized_data:
+    #     print(item)
+         
     # Obtener los IDs de las reservas
     ids_reservas = reservas.values_list('id', flat=True)
-    # print (ids_reservas)
     # Filtrar los pagos relacionados con las reservas del mes y año actual
-    pagos = Payments.objects.filter(reserva__id__in=ids_reservas)
-    for item in pagos:
-         print(item.id, item.monto, item.moneda_pago)
-         if (item.moneda_pago=='Pesos'):
-              
-            totales_pesos+=item.monto
-         elif (item.moneda_pago=='Pesos Chilenos'):
-            totales_pesos_chilenos+=item.monto
-         elif (item.moneda_pago=='Dolares'):
-            totales_dolares+=item.monto
+    # pagos = Payments.objects.filter(reserva__id__in=ids_reservas).prefetch_related('payments_set')
+    # for item in pagos:
+    #      print(item.id, item.monto, item.moneda_pago)
+    #      if (item.moneda_pago=='Pesos'):
+    #         totales_pesos+=item.monto
+    #      elif (item.moneda_pago=='Pesos Chilenos'):
+    #         totales_pesos_chilenos+=item.monto
+    #      elif (item.moneda_pago=='Dolares'):
+    #         totales_dolares+=item.monto
         
-    print("Ingresos en Pesos: ",totales_pesos)
-    print("Ingresos en Dolares: ",totales_dolares)
-    print("Ingresos en Pesos Chileno: ",totales_pesos_chilenos)
+    # print("Ingresos en Pesos: ",totales_pesos)
+    # print("Ingresos en Dolares: ",totales_dolares)
+    # print("Ingresos en Pesos Chileno: ",totales_pesos_chilenos)
+
+
     # # Calcular los ingresos totales por propiedad y comercio
     # ingresos_propiedad_comercio = pagos.values('reserva__propiedad__nombre', 'reserva__comercio').annotate(total_pagos=Sum('monto'))
 
@@ -228,4 +243,19 @@ def Montos(request):
     #     print(f'Comercio: {comercio}')
     #     print(f'Total pagos: {total_pagos}')
     #     print('---')
-    return JsonResponse(serialized_data.data, safe=False)
+    procesados =[]
+    # pagos_serialized= PaymentsSerializer(pagos, many=True).data
+    # print(type(pagos_serialized))
+    # for item in serialized_data:
+    #     temporal_reservas=[]
+    #     temporal_reservas.append({'id_reserva': item['id'], 'estatus': item['estatus']['nombre'], 'nombre_apellido': item['nombre_apellido'], 'propiedad':item['propiedad']['nombre'], 'checkin': item['fecha_ingreso'], 'cantidad_noches': item['cantidad_noches'], 'pagos': []})
+    #     pagos_temporal=[]
+    #     for item1 in pagos_serialized:
+    #          if (item['id'] == item1['reserva']):
+    #               print("coincidencia!")
+    #               pagos_temporal.append({'id': item1['reserva'], 'fecha_pago': item1['fecha_pago'], 'moneda_pago': item1['moneda_pago'], 'monto': item1['monto'], 'tipo_pago': item1['tipo_pago']})
+    #     temporal_reservas['id_reserva'== item[id]]=pagos_temporal
+    # for item in procesados:
+    #     print(item)
+
+    return JsonResponse(serialized_data, safe=False)
