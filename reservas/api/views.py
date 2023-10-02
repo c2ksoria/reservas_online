@@ -113,10 +113,31 @@ class ReservationFilter(django_filters.FilterSet):
     fecha_ingreso_lte = filters.DateFilter(field_name='fecha_ingreso', lookup_expr='lte')
     fecha_ingreso = filters.DateFromToRangeFilter(field_name='fecha_ingreso')
     # mes_en_curso = django_filters.NumberFilter(field_name='date__month', lookup_expr='exact')
+    fecha_prefijada = django_filters.CharFilter(method='filter_fecha_prefijada')
 
     class Meta:
         model = Reservation
-        fields = ['propiedad', 'origen_reserva', 'estatus', 'fecha_ingreso', 'fecha_egreso', 'nombre_apellido', 'fecha_ingreso_gte', 'fecha_ingreso_lte']
+        fields = ['propiedad', 'origen_reserva', 'estatus', 'fecha_ingreso', 'fecha_egreso', 'nombre_apellido']
+
+    def filter_fecha_prefijada(self, queryset, name, value):
+        if value:
+            # Parsea el rango de fechas
+            fecha_inicio, fecha_fin = value.split(',')
+            fecha_inicio = datetime.strptime(fecha_inicio, '%Y-%m-%d').date()
+            fecha_fin = datetime.strptime(fecha_fin, '%Y-%m-%d').date()
+
+            # Filtra las reservas que se superponen con el rango de fechas
+            superposicion = (
+                Q(fecha_ingreso__lte=fecha_fin) & Q(fecha_egreso__gte=fecha_inicio)
+            )
+
+            resultado = queryset.filter(superposicion)
+            return resultado
+
+        return queryset
+    # class Meta:
+    #     model = Reservation
+    #     fields = ['propiedad', 'origen_reserva', 'estatus', 'fecha_ingreso', 'fecha_egreso', 'nombre_apellido', 'fecha_ingreso_gte', 'fecha_ingreso_lte']
 
 class CustomPagination(PageNumberPagination):
     page_size = 10
@@ -166,6 +187,7 @@ class ListCommercial(generics.ListCreateAPIView):
 
 @api_view(['GET'])
 def Montos(request):
+    print("ingresando a montos....")
     idcomercio = request.GET.get('idCommercial')
     mes_actual = request.GET.get('idMes')
     idestatus = request.GET.get('idEstatus')
@@ -192,7 +214,7 @@ def Montos(request):
     consulta_estatus = Q()
     for estatus in estatus_filtrados:
         consulta_estatus |= Q(estatus__id=estatus)
-    # print(consulta_estatus)
+    print(consulta_estatus)
 
     # estatus_listado = ReservationStatus.objects.filter(Q(id=19) | Q(id=4))
 
