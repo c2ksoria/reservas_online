@@ -1,7 +1,7 @@
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from app.models import Reservation, ReservationStatus, ReservationOrigin, Property, Payments, Commercial
-from .serializers import ReservationSerializer, ReservationSerializer1, PaymentsSerializer, CommercialSerializer
+from .serializers import ReservationSerializer, ReservationSerializer1, PaymentsSerializer, CommercialSerializer, PropertySerializer
 from rest_framework.response import Response
 import django_filters
 from django_filters import rest_framework as filters
@@ -139,6 +139,42 @@ class ReservationFilter(django_filters.FilterSet):
     #     model = Reservation
     #     fields = ['propiedad', 'origen_reserva', 'estatus', 'fecha_ingreso', 'fecha_egreso', 'nombre_apellido', 'fecha_ingreso_gte', 'fecha_ingreso_lte']
 
+class FreeReservationFilter(django_filters.FilterSet):
+    fecha_checkin = django_filters.DateFilter(field_name='fecha_ingreso', lookup_expr='lte')
+    fecha_checkout = django_filters.DateFilter(field_name='fecha_egreso', lookup_expr='gte')
+    propiedades = django_filters.CharFilter(field_name='propiedad__id', method='filter_propiedades')
+    comercios = django_filters.CharFilter(field_name='propiedad__comercio__id', method='filter_comercios')
+
+    def filter_propiedades(self, queryset, name, value):
+        if value:
+            propiedades = value.split(',')  # Divide la cadena de propiedades en una lista
+            return queryset.filter(propiedad__id__in=propiedades)
+        return queryset
+    
+    def filter_comercios(self, queryset, name, value):
+        if value:
+            comercios = value.split(',')  # Divide la cadena de comercios en una lista
+            return queryset.filter(propiedad__comercio__id__in=comercios)
+        return queryset
+    
+
+    class Meta:
+        model = Reservation
+        fields = ['fecha_checkin', 'fecha_checkout', 'propiedades']
+
+class PropertyFilter(django_filters.FilterSet):
+    comercios = django_filters.CharFilter(method='filter_comercios')
+
+    def filter_comercios(self, queryset, name, value):
+        if value:
+            comercios = value.split(',')  # Divide la cadena de comercios en una lista
+            return queryset.filter(comercio__id__in=comercios)
+        return queryset
+
+    class Meta:
+        model = Property
+        fields = ['comercios']  # Agrega otros campos que desees filtrar en el modelo Property
+
 class CustomPagination(PageNumberPagination):
     page_size = 10
     page_size_query_param = 'page_size'
@@ -152,7 +188,19 @@ class ReservationList(generics.ListCreateAPIView):
     pagination_class = PageNumberPagination
     # pagination_class = CustomPagination
     # page_size = 5
-        
+
+class PropertiesList(generics.ListCreateAPIView):
+    serializer_class = ReservationSerializer
+    queryset = Reservation.objects.all()
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = FreeReservationFilter
+    
+class GetProperties(generics.ListCreateAPIView):
+    serializer_class = PropertySerializer
+    queryset = Property.objects.all()
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = PropertyFilter
+            
 class ReservationListPagination(generics.ListCreateAPIView):
     queryset = Reservation.objects.all()
     serializer_class = ReservationSerializer1
@@ -184,6 +232,10 @@ class CreatePayments(generics.CreateAPIView):
 class ListCommercial(generics.ListCreateAPIView):
     queryset = Commercial.objects.all()
     serializer_class = CommercialSerializer
+
+class PropertyList(generics.ListCreateAPIView):
+    queryset = Property.objects.all()
+    serializer_class = PropertySerializer
 
 @api_view(['GET'])
 def Montos(request):

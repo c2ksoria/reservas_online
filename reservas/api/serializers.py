@@ -18,11 +18,15 @@ class ReservationOriginSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = ReservationOrigin
         fields = ['id', 'nombre']
+class CommercialSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Commercial
+        fields = '__all__'
 
-class PropertySerializer(serializers.HyperlinkedModelSerializer):
+class PropertySerializer(serializers.ModelSerializer):
     class Meta:
         model = Property
-        fields = ['id', 'nombre', 'comercio', 'detalle']
+        fields = '__all__'
 
 
 class ReservationSerializer(serializers.ModelSerializer):
@@ -79,8 +83,3 @@ class ReservationSerializer1(serializers.ModelSerializer):
         fields = '__all__'
 
 
-
-class CommercialSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Commercial
-        fields = '__all__'
