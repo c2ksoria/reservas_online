@@ -26,6 +26,7 @@ from django.core import serializers
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
 from django.forms.models import model_to_dict
+from django.views import View
 
 @api_view(['GET'])
 def getData(request):
@@ -140,10 +141,11 @@ class ReservationFilter(django_filters.FilterSet):
     #     fields = ['propiedad', 'origen_reserva', 'estatus', 'fecha_ingreso', 'fecha_egreso', 'nombre_apellido', 'fecha_ingreso_gte', 'fecha_ingreso_lte']
 
 class FreeReservationFilter(django_filters.FilterSet):
-    fecha_checkin = django_filters.DateFilter(field_name='fecha_ingreso', lookup_expr='lte')
-    fecha_checkout = django_filters.DateFilter(field_name='fecha_egreso', lookup_expr='gte')
+    fecha_inicio = django_filters.DateFilter(field_name='fecha_ingreso', lookup_expr='lte')
+    fecha_fin = django_filters.DateFilter(field_name='fecha_egreso', lookup_expr='gte')
     propiedades = django_filters.CharFilter(field_name='propiedad__id', method='filter_propiedades')
     comercios = django_filters.CharFilter(field_name='propiedad__comercio__id', method='filter_comercios')
+    fecha_prefijada = django_filters.CharFilter(method='filter_fecha_prefijada')
 
     def filter_propiedades(self, queryset, name, value):
         if value:
@@ -157,10 +159,27 @@ class FreeReservationFilter(django_filters.FilterSet):
             return queryset.filter(propiedad__comercio__id__in=comercios)
         return queryset
     
+    def filter_fecha_prefijada(self, queryset, name, value):
+        if value:
+            # Parsea el rango de fechas
+            fecha_inicio, fecha_fin = value.split(',')
+            fecha_inicio = datetime.strptime(fecha_inicio, '%Y-%m-%d').date()
+            fecha_fin = datetime.strptime(fecha_fin, '%Y-%m-%d').date()
+            # print(fecha_inicio, fecha_fin)
+            # Filtra las reservas que se superponen con el rango de fechas
+            superposicion = (
+                (Q(fecha_ingreso__lt=fecha_fin) & Q(fecha_egreso__gt=fecha_inicio)) |
+                (Q(fecha_ingreso=fecha_inicio) & Q(fecha_egreso__gt=fecha_inicio)) |
+                (Q(fecha_ingreso__lt=fecha_fin) & Q(fecha_egreso=fecha_fin))
+            )
+            resultado = queryset.filter(superposicion)
+            return resultado
+
+        return queryset
 
     class Meta:
         model = Reservation
-        fields = ['fecha_checkin', 'fecha_checkout', 'propiedades']
+        fields = ['propiedades']
 
 class PropertyFilter(django_filters.FilterSet):
     comercios = django_filters.CharFilter(method='filter_comercios')
@@ -333,3 +352,26 @@ def Montos(request):
     #     print(item)
 
     return JsonResponse(serialized_data, safe=False)
+
+class DuplicateReservationView(View):
+    def get(self, request, reservation_id):
+        try:
+            # Obtiene la reserva original
+            original_reservation = Reservation.objects.get(id=reservation_id)
+
+            # Duplica la reserva usando la función copy_model
+            duplicate_reservation = Reservation()
+            duplicate_reservation.__dict__.update(original_reservation.__dict__)
+            duplicate_reservation.id =None
+            # Guarda la nueva reserva duplicada en la base de datos
+            duplicate_reservation.save()
+
+            # Devuelve el ID de la nueva reserva en la respuesta JSON
+            response_data = {
+                "message": "Reserva duplicada con éxito",
+                "new_reservation_id": duplicate_reservation.id
+            }
+            return JsonResponse(response_data)
+
+        except Reservation.DoesNotExist:
+            return JsonResponse({"error": "Reserva no encontrada"}, status=404)
