@@ -115,10 +115,11 @@ class ReservationFilter(django_filters.FilterSet):
     fecha_ingreso = filters.DateFromToRangeFilter(field_name='fecha_ingreso')
     # mes_en_curso = django_filters.NumberFilter(field_name='date__month', lookup_expr='exact')
     fecha_prefijada = django_filters.CharFilter(method='filter_fecha_prefijada')
+    comercio = django_filters.BaseInFilter(field_name='propiedad__comercio__id')
 
     class Meta:
         model = Reservation
-        fields = ['propiedad', 'origen_reserva', 'estatus', 'fecha_ingreso', 'fecha_egreso', 'nombre_apellido']
+        fields = ['propiedad', 'comercio','origen_reserva', 'estatus', 'fecha_ingreso', 'fecha_egreso', 'nombre_apellido']
 
     def filter_fecha_prefijada(self, queryset, name, value):
         if value:
@@ -165,8 +166,6 @@ class FreeReservationFilter(django_filters.FilterSet):
             fecha_inicio, fecha_fin = value.split(',')
             fecha_inicio = datetime.strptime(fecha_inicio, '%Y-%m-%d').date()
             fecha_fin = datetime.strptime(fecha_fin, '%Y-%m-%d').date()
-            # print(fecha_inicio, fecha_fin)
-            # Filtra las reservas que se superponen con el rango de fechas
             superposicion = (
                 (Q(fecha_ingreso__lt=fecha_fin) & Q(fecha_egreso__gt=fecha_inicio)) |
                 (Q(fecha_ingreso=fecha_inicio) & Q(fecha_egreso__gt=fecha_inicio)) |
