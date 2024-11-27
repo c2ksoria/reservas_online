@@ -20,5 +20,6 @@ Las caracterpisticas particulares son:
 - Filtrar propiedades por comercios.
 - Máquina de estados implementada para evitar errores en las transiciones entre estados de una reserva (Presupuesto, Activa, Check-In, Check- Out, etc).
 - Función de consulta de un "hueco" entre diferentes propiedades.
+- Función de filtrado de reservas por año, mes, comercio y estatus de reserva, para obtener el resumen mensual de reservas (Recaudación)
 
 Carpeta de almacenamiento de recibos de pagos: /reservas/media/receipt
