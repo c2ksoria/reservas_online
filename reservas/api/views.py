@@ -370,12 +370,13 @@ def Montos(request):
 class DuplicateReservationView(View):
     def get(self, request, reservation_id):
         try:
-            # Obtiene la reserva original
+            # Obtén la reserva original que deseas duplicar
             original_reservation = Reservation.objects.get(id=reservation_id)
 
-            # Duplica la reserva usando la función copy_model
+            # Crea una nueva instancia de la reserva y copia los campos
             duplicate_reservation = Reservation()
             duplicate_reservation.__dict__.update(original_reservation.__dict__)
+            # Eliminamos el id de la reserva duplicada para que el método save cree un nuevo id
             duplicate_reservation.id =None
             # Guarda la nueva reserva duplicada en la base de datos
             duplicate_reservation.save()
