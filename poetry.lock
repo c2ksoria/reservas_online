@@ -154,6 +154,14 @@ optional = false
 python-versions = ">=2.7, >=3.5"
 
 [[package]]
+name = "logging"
+version = "0.4.9.6"
+description = "A logging module for Python"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "pillow"
 version = "9.5.0"
 description = "Python Imaging Library (Fork)"
@@ -240,7 +248,7 @@ python-versions = ">=2"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "4b2aa216a65c26ea80fa0076c5348a7c3e70850c7042ee05b399d0717e447422"
+content-hash = "1cc9ce606180473a858d292aeebf35c447f48391149eed4916717ccf71b79c59"
 
 [metadata.files]
 annotated-types = []
@@ -273,6 +281,7 @@ django-jquery = []
 django-widget-tweaks = []
 djangorestframework = []
 install = []
+logging = []
 pillow = []
 pydantic = []
 pydantic-core = []

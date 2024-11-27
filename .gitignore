@@ -5,3 +5,5 @@ reservas/media
 reservas/members/__pycache__/
 reservas/members/migrations/
 reservas/reservas/__pycache__/
+reservas/api/__pycache__/
+reservas/logs/
