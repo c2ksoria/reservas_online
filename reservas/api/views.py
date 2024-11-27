@@ -267,104 +267,23 @@ class ListCommercial(generics.ListCreateAPIView):
 class PropertyList(generics.ListCreateAPIView):
     queryset = Property.objects.all()
     serializer_class = PropertySerializer
-
+# Recaudación
 @api_view(['GET'])
 def Montos(request):
-    print("ingresando a montos....")
+    # Obtener info principal
     idcomercio = request.GET.get('idCommercial')
     mes_actual = request.GET.get('idMes')
     idestatus = request.GET.get('idEstatus')
     año_actual = request.GET.get('anio')
-    print(año_actual)
-   
-
     split = idestatus.split(',')
-    # print (split)
-    # print(split[0], split[1])
-    nombre= Commercial.objects.get(id=idcomercio)
-    
-    totales_pesos=0
-    totales_dolares=0
-    totales_pesos_chilenos=0
-    print("---------------- " + nombre.nombre + "---------------- ")
-
-    # Obtener el mes y año actual
-    # mes_actual = 5
-    # año_actual = 2024
-    # print(mes_actual)
-
-    estatus_filtrados = split  # Reemplaza con los estatus que deseas filtrar
-
     # Construir la consulta utilizando la función Q
     consulta_estatus = Q()
-    for estatus in estatus_filtrados:
+    for estatus in split:
         consulta_estatus |= Q(estatus__id=estatus)
-    print(consulta_estatus)
-
-    # estatus_listado = ReservationStatus.objects.filter(Q(id=19) | Q(id=4))
-
-    # print(estatus_listado)
-    # for item in estatus_listado:
-    #     print(item.nombre)
-    # Obtener todas las reservas del mes y año actual
+    # Consulta
     reservas = Reservation.objects.filter(consulta_estatus,fecha_ingreso__month=mes_actual, fecha_ingreso__year=año_actual, propiedad__comercio__id=idcomercio).prefetch_related('pagos')
-    # for item in reservas:
-    #      print(item.id)
-    
-    reservations_list = [model_to_dict(reservation) for reservation in reservas]
-    # for reservation_dict in reservations_list:
-    #     print(reservation_dict)
-    
+    # Serializar utilizando un serializer secundario
     serialized_data=ReservationSerializer1(reservas, many=True).data
-    # for item in serialized_data:
-    #     print(item)
-         
-    # Obtener los IDs de las reservas
-    ids_reservas = reservas.values_list('id', flat=True)
-    # Filtrar los pagos relacionados con las reservas del mes y año actual
-    # pagos = Payments.objects.filter(reserva__id__in=ids_reservas).prefetch_related('payments_set')
-    # for item in pagos:
-    #      print(item.id, item.monto, item.moneda_pago)
-    #      if (item.moneda_pago=='Pesos'):
-    #         totales_pesos+=item.monto
-    #      elif (item.moneda_pago=='Pesos Chilenos'):
-    #         totales_pesos_chilenos+=item.monto
-    #      elif (item.moneda_pago=='Dolares'):
-    #         totales_dolares+=item.monto
-        
-    # print("Ingresos en Pesos: ",totales_pesos)
-    # print("Ingresos en Dolares: ",totales_dolares)
-    # print("Ingresos en Pesos Chileno: ",totales_pesos_chilenos)
-
-
-    # # Calcular los ingresos totales por propiedad y comercio
-    # ingresos_propiedad_comercio = pagos.values('reserva__propiedad__nombre', 'reserva__comercio').annotate(total_pagos=Sum('monto'))
-
-    # # Imprimir los resultados
-    # for ingreso in ingresos_propiedad_comercio:
-    #     propiedad = ingreso['reserva__propiedad__nombre']
-    #     comercio = ingreso['reserva__comercio']
-    #     total_pagos = ingreso['total_pagos']
-
-    #     print(f'Propiedad: {propiedad}')
-    #     print(f'Comercio: {comercio}')
-    #     print(f'Total pagos: {total_pagos}')
-    #     print('---')
-    procesados =[]
-    # pagos_serialized= PaymentsSerializer(pagos, many=True).data
-    # print(type(pagos_serialized))
-    # for item in serialized_data:
-    #     temporal_reservas=[]
-    #     temporal_reservas.append({'id_reserva': item['id'], 'estatus': item['estatus']['nombre'], 'nombre_apellido': item['nombre_apellido'], 'propiedad':item['propiedad']['nombre'], 'checkin': item['fecha_ingreso'], 'cantidad_noches': item['cantidad_noches'], 'pagos': []})
-    #     pagos_temporal=[]
-    #     for item1 in pagos_serialized:
-    #          if (item['id'] == item1['reserva']):
-    #               print("coincidencia!")
-    #               pagos_temporal.append({'id': item1['reserva'], 'fecha_pago': item1['fecha_pago'], 'moneda_pago': item1['moneda_pago'], 'monto': item1['monto'], 'tipo_pago': item1['tipo_pago']})
-    #     temporal_reservas['id_reserva'== item[id]]=pagos_temporal
-    # for item in procesados:
-    #     print(item)
-
     return JsonResponse(serialized_data, safe=False)
 
 class DuplicateReservationView(View):
