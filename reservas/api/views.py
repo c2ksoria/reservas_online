@@ -28,6 +28,8 @@ from rest_framework.pagination import PageNumberPagination
 from django.forms.models import model_to_dict
 from django.views import View
 
+from app.logging import mostrar
+
 @api_view(['GET'])
 def getData(request):
     serializer_context = {
@@ -230,6 +232,17 @@ class ReservationListPagination(generics.ListCreateAPIView):
 class CreateReservation(generics.CreateAPIView):
         serializer_class = ReservationSerializer
 
+        def create(self, request, *args, **kwargs):
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        def perform_create(self, serializer):
+            instance = serializer.save()
+            mostrar("se creó una nueva reserva")
+
+
 class UpdateReservation(generics.RetrieveUpdateDestroyAPIView):
         queryset = Reservation.objects.all()
         serializer_class = ReservationSerializer
@@ -261,7 +274,9 @@ def Montos(request):
     idcomercio = request.GET.get('idCommercial')
     mes_actual = request.GET.get('idMes')
     idestatus = request.GET.get('idEstatus')
-    # print(idestatus)
+    año_actual = request.GET.get('anio')
+    print(año_actual)
+   
 
     split = idestatus.split(',')
     # print (split)
@@ -275,7 +290,7 @@ def Montos(request):
 
     # Obtener el mes y año actual
     # mes_actual = 5
-    año_actual = 2023
+    # año_actual = 2024
     # print(mes_actual)
 
     estatus_filtrados = split  # Reemplaza con los estatus que deseas filtrar
