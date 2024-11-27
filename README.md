@@ -22,4 +22,3 @@ Las caracterpisticas particulares son:
 - Función de consulta de un "hueco" entre diferentes propiedades.
 
 Carpeta de almacenamiento de recibos de pagos: /reservas/media/receipt
-
