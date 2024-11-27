@@ -171,3 +171,35 @@ CORS_ORIGIN_WHITELIST = [
 
 CORS_ALLOW_ALL_ORIGINS = True
 
+# settings.py
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file_info': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'info.log'),  # Ruta al archivo info.log
+        },
+        'file_error': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'error.log'),  # Ruta al archivo error.log
+        },
+    },
+    'loggers': {
+        'tu_app.logger': {
+            'handlers': ['file_info', 'file_error'],
+            'level': 'INFO',  # Nivel de registro para el logger 'tu_app.logger'
+            'propagate': True,
+        },
+        'django': {
+            'handlers': ['file_info', 'file_error'],
+            'level': 'ERROR',  # Nivel de registro para el logger 'django'
+            'propagate': True,
+        },
+    },
+}
+
+
