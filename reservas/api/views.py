@@ -41,42 +41,27 @@ def getData(request):
 
     return Response(serializer.data)
 
-
+# Función dedicada a cambiar el estado de una reserva
 @api_view(['PUT'])
 def changeStatusReservation(request):
     respuesta = ""
     Estado_actual = ''
     objeto_reserva = ''
     data = request.data
-    print("-------------- data: --------------")
-    print(data)
-    print("-----------------------------------")
     id_reservation = data['id']
-    print(id_reservation)
     try:
         reservas = Reservation.objects.get(id=id_reservation)
         Estado_actual = reservas.estatus
-        print(Estado_actual.nombre)
         objeto_reserva = Estados(Estado_actual.nombre)
-        print(objeto_reserva.estado)
         objeto_reserva.transicion(data['accion'])
-        print(objeto_reserva.estado)
-        #     reservas.estatus.nombre=objeto_reserva.estado
         status = ReservationStatus.objects.get(nombre=objeto_reserva.estado)
-        print(status.nombre)
         reservas.estatus = status
-        # print("Estado: nombre: ",reservas.estatus.nombre, "id: ",reservas.estatus.id)
         reservas.save()
-        # reservas=Reservation.objects.get(id)
-        # Estado_actual= reservas.estatus.nombre
-        print("estado cambiado satisfactoriamente")
         respuesta = {'Data': {'status': 200,
                               'nuevoEstado': reservas.estatus.nombre}}
     except:
-        print("hubo un error en el backend...")
         respuesta = {'Data': {'status': 500,
                               'error': 'hubo un error, no se pudo cambiar el estado'}}
-
     return Response(respuesta)
 
 # def changeStatusReservation(request,pk):
