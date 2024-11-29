@@ -99,27 +99,28 @@ class ReservationFilter(django_filters.FilterSet):
         # Aplicar un orden predeterminado al queryset filtrado
         return super().filter_queryset(queryset).order_by('fecha_ingreso')
 
-
-
+# Filtro utilizado para buscar hueco en rango de fechas
 class FreeReservationFilter(django_filters.FilterSet):
     fecha_inicio = django_filters.DateFilter(field_name='fecha_ingreso', lookup_expr='lte')
     fecha_fin = django_filters.DateFilter(field_name='fecha_egreso', lookup_expr='gte')
     propiedades = django_filters.CharFilter(field_name='propiedad__id', method='filter_propiedades')
     comercios = django_filters.CharFilter(field_name='propiedad__comercio__id', method='filter_comercios')
     fecha_prefijada = django_filters.CharFilter(method='filter_fecha_prefijada')
-
+    # Filtro de propiedades por id
     def filter_propiedades(self, queryset, name, value):
         if value:
             propiedades = value.split(',')  # Divide la cadena de propiedades en una lista
             return queryset.filter(propiedad__id__in=propiedades)
         return queryset
     
+    # Filtro de Comercios por id
     def filter_comercios(self, queryset, name, value):
         if value:
             comercios = value.split(',')  # Divide la cadena de comercios en una lista
             return queryset.filter(propiedad__comercio__id__in=comercios)
         return queryset
     
+    # Filtro de por rango de fechas
     def filter_fecha_prefijada(self, queryset, name, value):
         if value:
             # Parsea el rango de fechas
