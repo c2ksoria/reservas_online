@@ -141,9 +141,10 @@ class FreeReservationFilter(django_filters.FilterSet):
         model = Reservation
         fields = ['propiedades']
 
+# Filtro de comercios
 class PropertyFilter(django_filters.FilterSet):
     comercios = django_filters.CharFilter(method='filter_comercios')
-
+    # Filtro por id de comercios
     def filter_comercios(self, queryset, name, value):
         if value:
             comercios = value.split(',')  # Divide la cadena de comercios en una lista
