@@ -36,7 +36,6 @@ def getData(request):
         'request': request,
     }
     reservas = Reservation.objects.all()
-
     serializer = ReservationSerializer1(
         reservas, many=True, context=serializer_context)
 
