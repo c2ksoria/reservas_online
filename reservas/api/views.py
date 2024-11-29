@@ -63,7 +63,7 @@ def changeStatusReservation(request):
         respuesta = {'Data': {'status': 500,
                               'error': 'hubo un error, no se pudo cambiar el estado'}}
     return Response(respuesta)
-
+# Clase para filtrar reservas con múltiples parámetros
 class ReservationFilter(django_filters.FilterSet):
     estatus = django_filters.BaseInFilter(field_name='estatus')
     nombre_apellido= django_filters.CharFilter(field_name='nombre_apellido', lookup_expr='icontains')
@@ -71,14 +71,14 @@ class ReservationFilter(django_filters.FilterSet):
     fecha_ingreso_gte = filters.DateFilter(field_name='fecha_ingreso', lookup_expr='gte')
     fecha_ingreso_lte = filters.DateFilter(field_name='fecha_ingreso', lookup_expr='lte')
     fecha_ingreso = filters.DateFromToRangeFilter(field_name='fecha_ingreso')
-    # mes_en_curso = django_filters.NumberFilter(field_name='date__month', lookup_expr='exact')
     fecha_prefijada = django_filters.CharFilter(method='filter_fecha_prefijada')
     comercio = django_filters.BaseInFilter(field_name='propiedad__comercio__id')
 
     class Meta:
         model = Reservation
         fields = ['propiedad', 'comercio','origen_reserva', 'estatus', 'fecha_ingreso', 'fecha_egreso', 'nombre_apellido']
-
+    
+    # Filtro personalizado en base a las fechas con el formato: YYYY-MM-DD,YYYY-MM-DD
     def filter_fecha_prefijada(self, queryset, name, value):
         if value:
             # Parsea el rango de fechas
@@ -90,14 +90,11 @@ class ReservationFilter(django_filters.FilterSet):
             superposicion = (
                 Q(fecha_ingreso__lte=fecha_fin) & Q(fecha_egreso__gte=fecha_inicio)
             )
-
             resultado = queryset.filter(superposicion)
             return resultado
 
         return queryset
-    # class Meta:
-    #     model = Reservation
-    #     fields = ['propiedad', 'origen_reserva', 'estatus', 'fecha_ingreso', 'fecha_egreso', 'nombre_apellido', 'fecha_ingreso_gte', 'fecha_ingreso_lte']
+
 
 class FreeReservationFilter(django_filters.FilterSet):
     fecha_inicio = django_filters.DateFilter(field_name='fecha_ingreso', lookup_expr='lte')
