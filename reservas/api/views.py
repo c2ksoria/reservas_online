@@ -94,6 +94,11 @@ class ReservationFilter(django_filters.FilterSet):
             return resultado
 
         return queryset
+    
+    def filter_queryset(self, queryset):
+        # Aplicar un orden predeterminado al queryset filtrado
+        return super().filter_queryset(queryset).order_by('fecha_ingreso')
+
 
 
 class FreeReservationFilter(django_filters.FilterSet):
