@@ -1,6 +1,6 @@
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from app.models import Reservation, ReservationStatus, ReservationOrigin, Property, Payments, Commercial
+from app.models import Reservation, ReservationStatus, Property, Payments, Commercial
 from .serializers import ReservationSerializer, ReservationSerializer1, PaymentsSerializer, CommercialSerializer, PropertySerializer
 from rest_framework.response import Response
 import django_filters
@@ -9,23 +9,23 @@ from django.db.models import Q
 
 from app.views import Estados
 
-from django.shortcuts import render
-from app.forms import CreateFormReservation
+# from django.shortcuts import render
+# from app.forms import CreateFormReservation
 from django.views.decorators.csrf import csrf_protect
 from django.http import JsonResponse
-import json
+# import json
 
 from rest_framework import generics
 from django.db.models import Sum
 
 from rest_framework import status
-from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse
+# from django.views.decorators.csrf import csrf_exempt
+# from django.http import HttpResponse
 from datetime import datetime
-from django.core import serializers
+# from django.core import serializers
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
-from django.forms.models import model_to_dict
+# from django.forms.models import model_to_dict
 from django.views import View
 
 from app.logging import mostrar
