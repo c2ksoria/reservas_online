@@ -46,26 +46,9 @@ class Property(models.Model):
     def __str__(self):
         return self.nombre
     
-
-
+# Modelo de Reservas, es el principal modelo de la api
 class Reservation(models.Model):
  
-    # ESTADOS_RESERVA = (
-
-    #     ('Presupuesto', 'Reserva Presupuestada'),
-    #     ('Activa', 'Reserva Activa'),
-    #     ('En proceso', 'Reserva En Proceso'),
-    #     ('Finalizada', 'Reserva Finalizada'),
-    #     ('Suspendida', 'Reserva Suspendida'),
-    #     ('Cancelada', 'Reserva Cancelada'),
-    # )
-
-    # COMPLEJOS = (
-    #     ('Complejo 1', 'Complejo 1'),
-    #     ('Complejo 2', 'Complejo 2'),
-    #     ('Complejo 3', 'Complejo 3'),
-    # )
-
     ORIGEN_RESERVA = (
         ('Booking', 'Booking'),
         ('Particular', 'Particular'),
@@ -79,18 +62,16 @@ class Reservation(models.Model):
     hora_checkin = models.TimeField()
     fecha_egreso = models.DateField()
     hora_checkout = models.TimeField()
-    # complejo = models.CharField(max_length=20, choices=COMPLEJOS)
     cantidad_personas = models.PositiveIntegerField()
     cantidad_noches = models.PositiveIntegerField(default=0)
-    presupuesto_dolares = models.DecimalField(max_digits=10, decimal_places=2)
-    presupuesto_pesos = models.DecimalField(max_digits=10, decimal_places=2)
+    presupuesto_dolares = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    presupuesto_pesos = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     notas = models.TextField(blank=True)
     origen_reserva = models.ForeignKey(ReservationOrigin, on_delete=models.CASCADE,null=True,blank=True,default=None)
     propiedad = models.ForeignKey(Property, on_delete=models.CASCADE, null=True)
-    # cochera= models.BooleanField(default=False)
+    
+    # Validar que la fecha de ingreso sea anterior a la de egreso
     def clean(self):
-        # Validar que la fecha de ingreso sea anterior a la de egreso
-            
         if self.fecha_ingreso is not None and self.fecha_egreso is not None:
             if self.fecha_egreso >= self.fecha_ingreso:
             # hacer algo aquí si las fechas son válidas
