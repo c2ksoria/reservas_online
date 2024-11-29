@@ -66,7 +66,7 @@ class Reservation(models.Model):
     cantidad_noches = models.PositiveIntegerField(default=0)
     presupuesto_dolares = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     presupuesto_pesos = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    notas = models.TextField(blank=True)
+    notas = models.TextField(blank=True, null=True)
     origen_reserva = models.ForeignKey(ReservationOrigin, on_delete=models.CASCADE,null=True,blank=True,default=None)
     propiedad = models.ForeignKey(Property, on_delete=models.CASCADE, null=True)
     
