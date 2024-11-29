@@ -64,34 +64,6 @@ def changeStatusReservation(request):
                               'error': 'hubo un error, no se pudo cambiar el estado'}}
     return Response(respuesta)
 
-# def changeStatusReservation(request,pk):
-#     serializer_context = {
-#             'request': request,
-#     }
-#     reservas=Reservation.objects.get(id=pk)
-#     Estado_actual= reservas.estatus.nombre
-#     print(Estado_actual)
-#     objeto_reserva = Estados(Estado_actual)
-#     print(objeto_reserva.estado)
-#     objeto_reserva.transicion('CheckinOk')
-#     print(objeto_reserva.estado)
-#     #     reservas.estatus.nombre=objeto_reserva.estado
-#     status= ReservationStatus.objects.get(id=3)
-#     print(status.nombre)
-#     reservas.estatus= status
-#     print("Estado: nombre: ",reservas.estatus.nombre, "id: ",reservas.estatus.id)
-#     reservas.save()
-#     reservas=Reservation.objects.get(id=pk)
-#     Estado_actual= reservas.estatus.nombre
-
-# #     serializer= ReservationSerializer(reservas, many=False, context=serializer_context)
-#     return Response({'status': 200, 'NuevoEstado': objeto_reserva.estado})
-
-
-
-        # formulario = CreateFormReservation()
-        # return JsonResponse({'form': formulario.as_p()})
-
 class ReservationFilter(django_filters.FilterSet):
     estatus = django_filters.BaseInFilter(field_name='estatus')
     nombre_apellido= django_filters.CharFilter(field_name='nombre_apellido', lookup_expr='icontains')
