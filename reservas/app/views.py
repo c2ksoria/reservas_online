@@ -100,17 +100,17 @@ def reservas_en_curso():
         raise ValidationError("Hubo un error...")
     return reservas
 
-
+# Especie de máquina de estados implementada
 class Estados:
     ESTADOS_POSIBLES = ["Presupuesto", "Activa",
                         "Suspendida", "Checkin", "Finalizada", 'Cancelada']
-
+    # Validación del estado inicial (actual)
     def __init__(self, estado_inicial):
         if estado_inicial not in self.ESTADOS_POSIBLES:
             raise ValueError("El estado inicial debe ser uno de los siguientes: {}".format(
                 self.ESTADOS_POSIBLES))
         self.estado = estado_inicial
-
+    # Validación de Transiciones
     def transicion(self, nueva_transicion):
         if self.estado == "Presupuesto":
             if nueva_transicion == "Activar":
