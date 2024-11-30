@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import index, ReservationList, ReservaCreateView, Formulario_nueva_reserva, Formulario_update_reserva, Formulario_nuevo_pago
+from .views import index, ReservationList, ReservaCreateView, Formulario_nueva_reserva, Formulario_update_reserva, Formulario_nuevo_pago, Test
 
 urlpatterns = [
     path('', index, name='index'),
@@ -8,4 +8,5 @@ urlpatterns = [
     path('reservations/form', Formulario_nueva_reserva, name='form_new_reserva'),
     path('reservations/update/<int:pk>', Formulario_update_reserva, name='form_update_reserva'),
     path('payments/form', Formulario_nuevo_pago, name='form_update_reserva'),
+    path('test', Test, name='test'),
 ]
