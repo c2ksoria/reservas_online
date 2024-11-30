@@ -203,10 +203,12 @@ class CreateReservation(generics.CreateAPIView):
         def perform_create(self, serializer):
             instance = serializer.save()
 
+# Función para actualizar una reserva
 class UpdateReservation(generics.RetrieveUpdateDestroyAPIView):
         queryset = Reservation.objects.all()
         serializer_class = ReservationSerializer
 
+# Función para listar pagos en base a un id
 class PaymentsList(generics.ListCreateAPIView):
         queryset = Payments.objects.all()
         serializer_class = PaymentsSerializer
@@ -216,17 +218,20 @@ class PaymentsList(generics.ListCreateAPIView):
             .get_queryset(*args, **kwargs)
             .filter(reserva=self.kwargs['pk'])
         )
-
+# Función para crear pagos y asociarlos a una reserva
 class CreatePayments(generics.CreateAPIView):
         serializer_class = PaymentsSerializer
 
+# Función para filtrar comercios
 class ListCommercial(generics.ListCreateAPIView):
     queryset = Commercial.objects.all()
     serializer_class = CommercialSerializer
 
+# Función para filtrar propiedades
 class PropertyList(generics.ListCreateAPIView):
     queryset = Property.objects.all()
     serializer_class = PropertySerializer
+
 # Recaudación
 @api_view(['GET'])
 def Montos(request):
@@ -246,6 +251,7 @@ def Montos(request):
     serialized_data=ReservationSerializer1(reservas, many=True).data
     return JsonResponse(serialized_data, safe=False)
 
+# Función de duplicado de reserva basada en un id como parámetro
 class DuplicateReservationView(View):
     def get(self, request, reservation_id):
         try:
