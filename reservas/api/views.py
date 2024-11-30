@@ -160,35 +160,37 @@ class CustomPagination(PageNumberPagination):
     page_size_query_param = 'page_size'
     max_page_size = 100
 
+# Función de búsqueda de reservas
 class ReservationList(generics.ListCreateAPIView):
     queryset = Reservation.objects.all()
     serializer_class = ReservationSerializer1
     filter_backends = [DjangoFilterBackend]
     filterset_class = ReservationFilter
     pagination_class = PageNumberPagination
-    # pagination_class = CustomPagination
-    # page_size = 5
 
+# Función de búsqueda de un hueco o ventana de propiedades disponibles, dado un rango de fechas como parámetro principal
 class PropertiesList(generics.ListCreateAPIView):
     serializer_class = ReservationSerializer
     queryset = Reservation.objects.all()
     filter_backends = [DjangoFilterBackend]
     filterset_class = FreeReservationFilter
-    
+
+# Función de búsqueda de propiedades
 class GetProperties(generics.ListCreateAPIView):
     serializer_class = PropertySerializer
     queryset = Property.objects.all()
     filter_backends = [DjangoFilterBackend]
     filterset_class = PropertyFilter
-            
+
+# Función a utilizar para búsqueda de reservas teniendo en cuenta resultados paginados            
 class ReservationListPagination(generics.ListCreateAPIView):
     queryset = Reservation.objects.all()
     serializer_class = ReservationSerializer1
     filter_backends = [DjangoFilterBackend]
     filterset_class = ReservationFilter
     pagination_class = CustomPagination
-    # page_size = 5
 
+# Función para la creación de reservas
 class CreateReservation(generics.CreateAPIView):
         serializer_class = ReservationSerializer
 
@@ -200,8 +202,6 @@ class CreateReservation(generics.CreateAPIView):
 
         def perform_create(self, serializer):
             instance = serializer.save()
-            mostrar("se creó una nueva reserva")
-
 
 class UpdateReservation(generics.RetrieveUpdateDestroyAPIView):
         queryset = Reservation.objects.all()
