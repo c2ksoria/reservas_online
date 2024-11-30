@@ -2,43 +2,21 @@ from datetime import date
 
 from django.core.exceptions import ValidationError
 from django.db.models import Q
-from django.http import HttpResponse
 from django.shortcuts import render
 from django.utils import timezone
 from django.http import JsonResponse
-
 from django.views.generic import CreateView, ListView
-
-from django.urls import reverse_lazy, reverse
-
+from django.urls import reverse_lazy
 from datetime import datetime
-
 from .models import Reservation
 from .forms import CreateFormReservation, CreateFormPayment
 
-# from ..api.serializers import ReservationSerializer
-
-
-from rest_framework.views import APIView
-from rest_framework.response import Response
-# from rest_framework import status
-# from rest_framework import authentication, permissions
-from rest_framework import viewsets
-
 # Create your views here.
-
-
+# Función utilizada para probar los cambios de los estados
 def index(request):
-    # reservas = reservas_del_dia()
+    
     reservas = reservas_en_curso()
-    # xx= Reservation.objects.all()
-    print(reservas)
-    for item in reservas:
-        print("-----------------")
-        print(item.propiedad.nombre, item.propiedad.comercio.nombre)
-        print("-----------------")
-        print(item.fecha_ingreso)
-
+    
     estado = Estados('Presupuesto')
     print(estado.estado)
     estado.transicion('confirmar')
@@ -49,8 +27,6 @@ def index(request):
     print(estado.estado)
     estado = Estados('Presupuesto')
     print(estado.estado)
-
-    # return HttpResponse("Hello, world. You're at the polls index.")
     return render(request, 'base.html')
 
 
@@ -138,11 +114,6 @@ class Estados:
         else:
             raise ValueError("Error: estado no válido")
 
-
-# class ReservationListApiView(viewsets.ModelViewSet):
-
-#     queryset = Reservation.objects.all()
-#     serializer_class = ReservationSerializer
 
 def Formulario_nueva_reserva(request):
     if request.method == 'GET':
