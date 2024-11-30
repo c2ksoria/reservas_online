@@ -10,25 +10,28 @@ from django.urls import reverse_lazy
 from datetime import datetime
 from .models import Reservation
 from .forms import CreateFormReservation, CreateFormPayment
+from django.http import JsonResponse
 
 # Create your views here.
 # Función utilizada para probar los cambios de los estados
 def index(request):
-    
-    reservas = reservas_en_curso()
-    
-    estado = Estados('Presupuesto')
-    print(estado.estado)
-    estado.transicion('confirmar')
-    print(estado.estado)
-    estado.transicion('checkin')
-    print(estado.estado)
-    estado.transicion('finalizada')
-    print(estado.estado)
-    estado = Estados('Presupuesto')
-    print(estado.estado)
     return render(request, 'base.html')
 
+def Test (request):
+    reservas_en_curso()
+    testTransition()
+    return JsonResponse ({"msj": "Test Finalizado"}, status=200)
+
+def testTransition():
+    estado = Estados('Presupuesto')
+    print(estado.estado)
+    estado.transicion('Activar')
+    print(estado.estado)
+    estado.transicion('Checkin Ok')
+    print(estado.estado)
+    estado.transicion('Finalizar')
+    
+    print(estado.estado)
 
 class ReservationList(ListView):
     model = Reservation
