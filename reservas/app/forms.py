@@ -3,11 +3,8 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.forms import ModelForm
 from .models import Reservation, Payments
 
-
-
-
+# Formulario para crear reservas
 class CreateFormReservation(ModelForm):
-    # cochera=forms.BooleanField()
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for form in self.visible_fields():
@@ -22,9 +19,9 @@ class CreateFormReservation(ModelForm):
             'hora_checkin':  forms.widgets.TimeInput(attrs={'type': 'time'}),
             'fecha_egreso':  forms.widgets.DateInput(attrs={'type': 'date', 'value': '{{ reservation.fecha_egreso }}'}),
             'hora_checkout':  forms.widgets.TimeInput(attrs={'type': 'time'}),
-            # 'cochera':  forms.widgets.CheckboxInput(attrs={'type': 'checkbox', 'class': 'checkbox'}),
         }
 
+# Formulario para crear pagos
 class CreateFormPayment(ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -37,5 +34,3 @@ class CreateFormPayment(ModelForm):
         widgets = {
             'fecha_pago':  forms.widgets.DateInput(attrs={'type': 'date'}),
          }
-        
-
