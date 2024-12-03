@@ -74,7 +74,7 @@ class ReservationSerializer1(serializers.ModelSerializer):
     origen_reserva = ReservationOriginSerializer(read_only=True)
     propiedad = ReservationOriginSerializer(read_only=True)
     pagos = PaymentsSerializer(many=True, read_only=True)
-
+    comercios= CommercialSerializer(many=True, read_only=True)
     # estatus = serializers.PrimaryKeyRelatedField(read_only=True)
     # origen_reserva = serializers.PrimaryKeyRelatedField(read_only=True)
     # propiedad = serializers.PrimaryKeyRelatedField(read_only=True)
