@@ -1,6 +1,6 @@
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from app.models import Reservation, ReservationStatus, Property, Payments, Commercial
+from app.models import Reservation, ReservationStatus, Property, Payments, Commercial, ReservationOrigin
 from .serializers import ReservationSerializer, ReservationSerializer1, PaymentsSerializer, CommercialSerializer, PropertySerializer
 from rest_framework.response import Response
 import django_filters
@@ -167,6 +167,11 @@ class ReservationList(generics.ListCreateAPIView):
     filter_backends = [DjangoFilterBackend]
     filterset_class = ReservationFilter
     pagination_class = PageNumberPagination
+    
+    def get_queryset(self):
+        if self.request.query_params:  # Solo ejecutar la consulta si hay parámetros
+            return Reservation.objects.all()
+        return Reservation.objects.none()  # Devuelve un queryset vacío
 
 # Función de búsqueda de un hueco o ventana de propiedades disponibles, dado un rango de fechas como parámetro principal
 class PropertiesList(generics.ListCreateAPIView):
@@ -232,24 +237,44 @@ class PropertyList(generics.ListCreateAPIView):
     queryset = Property.objects.all()
     serializer_class = PropertySerializer
 
-# Recaudación
-@api_view(['GET'])
-def Montos(request):
-    # Obtener info principal
-    idcomercio = request.GET.get('idCommercial')
-    mes_actual = request.GET.get('idMes')
-    idestatus = request.GET.get('idEstatus')
-    año_actual = request.GET.get('anio')
-    split = idestatus.split(',')
-    # Construir la consulta utilizando la función Q
-    consulta_estatus = Q()
-    for estatus in split:
-        consulta_estatus |= Q(estatus__id=estatus)
-    # Consulta
-    reservas = Reservation.objects.filter(consulta_estatus,fecha_ingreso__month=mes_actual, fecha_ingreso__year=año_actual, propiedad__comercio__id=idcomercio).prefetch_related('pagos')
-    # Serializar utilizando un serializer secundario
-    serialized_data=ReservationSerializer1(reservas, many=True).data
-    return JsonResponse(serialized_data, safe=False)
+# Filtro para calcular montos
+class MontosFilter(django_filters.FilterSet):
+    estatus = django_filters.BaseInFilter(field_name='estatus')
+    comercios = django_filters.BaseInFilter(field_name='propiedad__comercio__id')
+    anio = django_filters.NumberFilter(
+        field_name='fecha_ingreso',
+        lookup_expr='year',  # Filtra por el año
+        label="Año"
+    )
+    mes = django_filters.NumberFilter(
+        field_name='fecha_ingreso',
+        lookup_expr='month',  # Filtra por el mes
+        label="Mes"
+    )
+
+    class Meta:
+        model = Reservation
+        fields = ['estatus', 'comercios', 'anio', 'mes']
+
+class MontosList(generics.ListCreateAPIView):
+    """
+        This view should return a list reservations and all the payments relatives to it.
+    """
+    name = "Amount List"
+    queryset = Reservation.objects.prefetch_related('pagos')  # Optimiza las consultas con prefetch_related
+    serializer_class = ReservationSerializer1
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = MontosFilter
+
+    class Meta:
+        model = Reservation
+        fields = ['propiedad', 'comercios','origen_reserva', 'estatus', 'fecha_ingreso', 'fecha_egreso', 'nombre_apellido']
+
+    def get_queryset(self):
+        print(self.request.query_params)
+        if self.request.query_params:  # Solo ejecutar la consulta si hay parámetros
+            return Reservation.objects.all()
+        return Reservation.objects.none()  # Devuelve un queryset vacío
 
 # Función de duplicado de reserva basada en un id como parámetro
 class DuplicateReservationView(View):

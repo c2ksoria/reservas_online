@@ -39,9 +39,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_filters',
     'rest_framework',
     'app',
     'members',
+    'api',
     'corsheaders',
 ]
 
@@ -128,14 +130,15 @@ BOOTSTRAP_DATEPICKER_PLUS = {
     }
 }
 
-# REST_FRAMEWORK = {
-#    'DEFAULT_AUTHENTICATION_CLASSES': (
-#        'rest_framework.authentication.TokenAuthentication',
-#    ),
-#    'DEFAULT_PERMISSION_CLASSES': (
-#         'rest_framework.permissions.IsAuthenticated'
-#    ),
-# }
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',  # Para JSON
+        'rest_framework.renderers.BrowsableAPIRenderer',  # Para la interfaz web
+    ],
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',  # Backend de filtros
+    ],
+}
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
