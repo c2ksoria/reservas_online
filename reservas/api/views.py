@@ -197,32 +197,51 @@ class ReservationListPagination(generics.ListCreateAPIView):
 
 # Función para la creación de reservas
 class CreateReservation(generics.CreateAPIView):
-        serializer_class = ReservationSerializer
-
-        def create(self, request, *args, **kwargs):
-            serializer = self.get_serializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            self.perform_create(serializer)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        def perform_create(self, serializer):
+    """
+        This view can make new reservations.
+    """
+    serializer_class = ReservationSerializer
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    def perform_create(self, serializer):
             instance = serializer.save()
 
 # Función para actualizar una reserva
 class UpdateReservation(generics.RetrieveUpdateDestroyAPIView):
-        queryset = Reservation.objects.all()
-        serializer_class = ReservationSerializer
+    """
+        This view can update and delete exist reservation.
+    """
+    queryset = Reservation.objects.all()
+    serializer_class = ReservationSerializer
+
+# Filtro de pagos
+class PaymentsFilter(django_filters.FilterSet):
+    reserva = django_filters.NumberFilter(field_name='reserva', label='Reservation ID')
+    # Filtro por id de reserva
+    class Meta:
+        model = Payments
+        fields = ['reserva']  # Agrega otros campos que desees filtrar en el modelo Property
 
 # Función para listar pagos en base a un id
 class PaymentsList(generics.ListCreateAPIView):
+        '''
+            View that show payments relatives to one reservation
+        '''
         queryset = Payments.objects.all()
         serializer_class = PaymentsSerializer
-        def get_queryset(self,  *args, **kwargs) :
-            return (
-            super()
-            .get_queryset(*args, **kwargs)
-            .filter(reserva=self.kwargs['pk'])
-        )
+        filter_backends = [DjangoFilterBackend]
+        filterset_class = PaymentsFilter
+        def get_queryset(self, *args, **kwargs):
+            # Filtrar por el ID si está en los parámetros de consulta
+            payment_id = self.request.query_params.get('reserva')
+            if payment_id:
+                return Payments.objects.filter(reserva=payment_id)
+            # Si no hay ID, devuelve todos los pagos
+            return Payments.objects.none()
+
 # Función para crear pagos y asociarlos a una reserva
 class CreatePayments(generics.CreateAPIView):
         serializer_class = PaymentsSerializer
