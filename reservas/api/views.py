@@ -248,11 +248,17 @@ class CreatePayments(generics.CreateAPIView):
 
 # Función para filtrar comercios
 class ListCommercial(generics.ListCreateAPIView):
+    '''
+        This view show all commercial companies
+    '''
     queryset = Commercial.objects.all()
     serializer_class = CommercialSerializer
 
 # Función para filtrar propiedades
 class PropertyList(generics.ListCreateAPIView):
+    '''
+        This view show all properties
+    '''
     queryset = Property.objects.all()
     serializer_class = PropertySerializer
 
