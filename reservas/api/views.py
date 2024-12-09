@@ -19,6 +19,8 @@ from rest_framework import generics
 from django.db.models import Sum
 
 from rest_framework import status
+from rest_framework.views import  APIView
+
 # from django.views.decorators.csrf import csrf_exempt
 # from django.http import HttpResponse
 from datetime import datetime
@@ -27,8 +29,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
 # from django.forms.models import model_to_dict
 from django.views import View
-
 from app.logging import mostrar
+from django.shortcuts import get_object_or_404
 
 @api_view(['GET'])
 def getData(request):
@@ -302,8 +304,11 @@ class MontosList(generics.ListCreateAPIView):
         return Reservation.objects.none()  # Devuelve un queryset vacío
 
 # Función de duplicado de reserva basada en un id como parámetro
-class DuplicateReservationView(View):
-    def get(self, request, reservation_id):
+class DuplicateReservationView(APIView):
+    '''
+        This view can duplicate a reservation by id
+    '''
+    def post(self, request, reservation_id):
         try:
             # Obtén la reserva original que deseas duplicar
             original_reservation = Reservation.objects.get(id=reservation_id)
@@ -324,4 +329,15 @@ class DuplicateReservationView(View):
             return JsonResponse(response_data)
 
         except Reservation.DoesNotExist:
-            return JsonResponse({"error": "Reserva no encontrada"}, status=404)
+            return JsonResponse({"error": "Reserva no encontrada"}, status=status.HTTP_404_NOT_FOUND)
+    def get(self, request, reservation_id=None):
+        """
+        This method show how to works the duplicated function
+        """
+        return Response({
+            "description": "Use this endpoint to duplicate reservations.",
+            "usage": "Send a POST request to /api/reservations/<reservation_id>/duplicate/",
+            "example": {
+                "curl": "curl -X POST http://127.0.0.1:8000/api/reservations/1/duplicate/"
+            }
+        })

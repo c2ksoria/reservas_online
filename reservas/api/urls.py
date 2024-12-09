@@ -19,7 +19,8 @@ urlpatterns = [
     path('property', PropertyList.as_view(), name='property'),
     path('hueco/', PropertiesList.as_view()),
     path('propiedadeslist/', GetProperties.as_view()),
-    path('duplicate-reservation/<int:reservation_id>', DuplicateReservationView.as_view()),
+    path('duplicate-reservation/', DuplicateReservationView.as_view(), name='duplicate_list'),
+    path('duplicate-reservation/<int:reservation_id>', DuplicateReservationView.as_view(), name= 'duplicate_reservation'),
 
     # path('add/', new_reservation),
 ]
