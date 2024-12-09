@@ -8,29 +8,15 @@ from django_filters import rest_framework as filters
 from django.db.models import Q
 
 from app.views import Estados
-
-# from django.shortcuts import render
-# from app.forms import CreateFormReservation
 from django.views.decorators.csrf import csrf_protect
 from django.http import JsonResponse
-# import json
-
 from rest_framework import generics
-from django.db.models import Sum
-
 from rest_framework import status
 from rest_framework.views import  APIView
-
-# from django.views.decorators.csrf import csrf_exempt
-# from django.http import HttpResponse
 from datetime import datetime
-# from django.core import serializers
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
-# from django.forms.models import model_to_dict
-from django.views import View
-from app.logging import mostrar
-from django.shortcuts import get_object_or_404
+
 
 @api_view(['GET'])
 def getData(request):
