@@ -56,13 +56,13 @@ def changeStatusReservation(request):
         Estado_actual = reservas.estatus
         objeto_reserva = Estados(Estado_actual.nombre)
         objeto_reserva.transicion(data['accion'])
-        status = ReservationStatus.objects.get(nombre=objeto_reserva.estado)
-        reservas.estatus = status
+        nuevo_status = ReservationStatus.objects.get(nombre=objeto_reserva.estado)
+        reservas.estatus = nuevo_status
         reservas.save()
-        respuesta = {'Data': {'status': 200,
+        respuesta = {'Data': {'status': status.HTTP_200_OK,
                               'nuevoEstado': reservas.estatus.nombre}}
     except:
-        respuesta = {'Data': {'status': 500,
+        respuesta = {'Data': {'status': status.HTTP_500_INTERNAL_SERVER_ERROR,
                               'error': 'hubo un error, no se pudo cambiar el estado'}}
     return Response(respuesta)
 # Clase para filtrar reservas con múltiples parámetros
