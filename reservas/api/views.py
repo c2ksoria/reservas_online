@@ -284,7 +284,6 @@ class MontosList(generics.ListCreateAPIView):
         fields = ['propiedad', 'comercios','origen_reserva', 'estatus', 'fecha_ingreso', 'fecha_egreso', 'nombre_apellido']
 
     def get_queryset(self):
-        print(self.request.query_params)
         if self.request.query_params:  # Solo ejecutar la consulta si hay parámetros
             return Reservation.objects.all()
         return Reservation.objects.none()  # Devuelve un queryset vacío
