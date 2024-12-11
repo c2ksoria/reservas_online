@@ -18,17 +18,6 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
 
 
-@api_view(['GET'])
-def getData(request):
-    serializer_context = {
-        'request': request,
-    }
-    reservas = Reservation.objects.all()
-    serializer = ReservationSerializer1(
-        reservas, many=True, context=serializer_context)
-
-    return Response(serializer.data)
-
 # Función dedicada a cambiar el estado de una reserva
 @api_view(['PUT'])
 def changeStatusReservation(request):
