@@ -1,11 +1,10 @@
 
 from django.urls import path, include
 
-from .views import getData, changeStatusReservation, ReservationList, CreateReservation, UpdateReservation, CreatePayments, PaymentsList, ListCommercial, ReservationListPagination, PropertiesList, PropertyList, GetProperties, DuplicateReservationView, MontosList
+from .views import changeStatusReservation, ReservationList, CreateReservation, UpdateReservation, CreatePayments, PaymentsList, ListCommercial, ReservationListPagination, PropertiesList, PropertyList, GetProperties, DuplicateReservationView, MontosList
 
 
 urlpatterns = [
-    path('', getData),
     path('changestatus/', changeStatusReservation),
     path('list/', ReservationList.as_view()),
     path('pagination/', ReservationListPagination.as_view()),
