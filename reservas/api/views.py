@@ -21,6 +21,9 @@ from rest_framework.pagination import PageNumberPagination
 # Función dedicada a cambiar el estado de una reserva
 @api_view(['PUT'])
 def changeStatusReservation(request):
+    '''
+        This view can change status of reservations by id
+    '''
     respuesta = ""
     Estado_actual = ''
     objeto_reserva = ''
@@ -139,6 +142,11 @@ class CustomPagination(PageNumberPagination):
 
 # Función de búsqueda de reservas
 class ReservationList(generics.ListCreateAPIView):
+    '''
+        This view show a list of reservations, it can filter by property name,
+        propierty id (multiple), origin reservation, status (multiple), date of checkin,
+        date of checkout and name (it contains).
+    '''
     queryset = Reservation.objects.all()
     serializer_class = ReservationSerializer1
     filter_backends = [DjangoFilterBackend]
@@ -152,6 +160,9 @@ class ReservationList(generics.ListCreateAPIView):
 
 # Función de búsqueda de un hueco o ventana de propiedades disponibles, dado un rango de fechas como parámetro principal
 class PropertiesList(generics.ListCreateAPIView):
+    '''
+        Main view to find a gap (space) betwen two dates and selected properties
+    '''
     serializer_class = ReservationSerializer
     queryset = Reservation.objects.all()
     filter_backends = [DjangoFilterBackend]
@@ -159,6 +170,9 @@ class PropertiesList(generics.ListCreateAPIView):
 
 # Función de búsqueda de propiedades
 class GetProperties(generics.ListCreateAPIView):
+    '''
+        View of creation and show all the properties
+    '''
     serializer_class = PropertySerializer
     queryset = Property.objects.all()
     filter_backends = [DjangoFilterBackend]
@@ -166,6 +180,9 @@ class GetProperties(generics.ListCreateAPIView):
 
 # Función a utilizar para búsqueda de reservas teniendo en cuenta resultados paginados            
 class ReservationListPagination(generics.ListCreateAPIView):
+    '''
+        View of reservations objects with pagination
+    '''
     queryset = Reservation.objects.all()
     serializer_class = ReservationSerializer1
     filter_backends = [DjangoFilterBackend]
@@ -221,6 +238,9 @@ class PaymentsList(generics.ListCreateAPIView):
 
 # Función para crear pagos y asociarlos a una reserva
 class CreatePayments(generics.CreateAPIView):
+        '''
+            View for create payments
+        '''
         serializer_class = PaymentsSerializer
 
 # Función para filtrar comercios
