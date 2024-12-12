@@ -16,9 +16,48 @@ from rest_framework.views import  APIView
 from datetime import datetime
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
-
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 # Función dedicada a cambiar el estado de una reserva
+@swagger_auto_schema(
+    method='put',
+    operation_summary="Change Reservation Status",
+    operation_description="This endpoint allows you to change the status of a reservation based on its ID.",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'id': openapi.Schema(type=openapi.TYPE_INTEGER, description='Reservation ID'),
+            'accion': openapi.Schema(type=openapi.TYPE_STRING, description='Action to perform (Activar, Cancelar, Checkin Ok, Suspender, Finalizar)')
+        },
+        required=['id', 'accion']
+    ),
+    responses={
+        200: openapi.Response(
+            description="Status changed successfully",
+            examples={
+                "application/json": {
+                    "Data": {
+                        "status": 200,
+                        "nuevoEstado": "Activa"
+                    }
+                }
+            }
+        ),
+
+        500: openapi.Response(
+            description="Hubo un error",
+            examples={
+                "application/json": {
+                    "Data": {
+                        "status": "500",
+                        "error": "hubo un error, no se pudo cambiar el estado"
+                    }
+                }
+            }
+        ),
+    }
+)
 @api_view(['PUT'])
 def changeStatusReservation(request):
     '''
@@ -250,6 +289,7 @@ class ListCommercial(generics.ListCreateAPIView):
     '''
     queryset = Commercial.objects.all()
     serializer_class = CommercialSerializer
+    http_method_names = ['get']
 
 # Función para filtrar propiedades
 class PropertyList(generics.ListCreateAPIView):
