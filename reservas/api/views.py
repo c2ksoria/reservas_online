@@ -251,6 +251,7 @@ class UpdateReservation(generics.RetrieveUpdateDestroyAPIView):
     """
     queryset = Reservation.objects.all()
     serializer_class = ReservationSerializer
+    http_method_names = ['get', 'put']
 
 # Filtro de pagos
 class PaymentsFilter(django_filters.FilterSet):
