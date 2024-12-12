@@ -276,13 +276,6 @@ class PaymentsList(generics.ListCreateAPIView):
             # Si no hay ID, devuelve todos los pagos
             return Payments.objects.none()
 
-# Función para crear pagos y asociarlos a una reserva
-class CreatePayments(generics.CreateAPIView):
-        '''
-            View for create payments
-        '''
-        serializer_class = PaymentsSerializer
-
 # Función para filtrar comercios
 class ListCommercial(generics.ListCreateAPIView):
     '''
