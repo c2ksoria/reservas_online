@@ -206,6 +206,7 @@ class PropertiesList(generics.ListCreateAPIView):
     queryset = Reservation.objects.all()
     filter_backends = [DjangoFilterBackend]
     filterset_class = FreeReservationFilter
+    http_method_names = ['get']
 
 # Función de búsqueda de propiedades
 class GetProperties(generics.ListCreateAPIView):
