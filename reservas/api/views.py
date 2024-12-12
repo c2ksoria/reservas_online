@@ -208,15 +208,16 @@ class PropertiesList(generics.ListCreateAPIView):
     filterset_class = FreeReservationFilter
     http_method_names = ['get']
 
-# Función de búsqueda de propiedades
+# Función de búsqueda de propiedades por id de comercios
 class GetProperties(generics.ListCreateAPIView):
     '''
-        View of creation and show all the properties
+        View to filter all properties from ids of comercios
     '''
     serializer_class = PropertySerializer
     queryset = Property.objects.all()
     filter_backends = [DjangoFilterBackend]
     filterset_class = PropertyFilter
+    http_method_names = ['get']
 
 # Función a utilizar para búsqueda de reservas teniendo en cuenta resultados paginados            
 class ReservationListPagination(generics.ListCreateAPIView):
