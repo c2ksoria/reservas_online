@@ -1,7 +1,7 @@
 
 from django.urls import path, include
 
-from .views import changeStatusReservation, ReservationList, CreateReservation, UpdateReservation, CreatePayments, PaymentsList, ListCommercial, ReservationListPagination, PropertiesList, PropertyList, GetProperties, DuplicateReservationView, MontosList
+from .views import changeStatusReservation, ReservationList, CreateReservation, UpdateReservation, PaymentsList, ListCommercial, ReservationListPagination, PropertiesList, PropertyList, GetProperties, DuplicateReservationView, MontosList
 
 
 urlpatterns = [
@@ -10,9 +10,7 @@ urlpatterns = [
     path('pagination/', ReservationListPagination.as_view()),
     path('add/', CreateReservation.as_view(), name='create_reservation'),
     path('update/<int:pk>', UpdateReservation.as_view(), name='update_reservation'),
-    path('reservations/payments/list/', PaymentsList.as_view(), name='list_payments'),
-    path('reservations/payments/add',
-         CreatePayments.as_view(), name='add_payment'),
+    path('reservations/payments/', PaymentsList.as_view(), name='list_payments'),
     path('montos', MontosList.as_view(), name='amount_list'),
     path('commercial', ListCommercial.as_view(), name='commercial'),
     path('property', PropertyList.as_view(), name='property'),
