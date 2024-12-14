@@ -1,6 +1,6 @@
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
-from app.models import Reservation, ReservationStatus, Property, Payments, Commercial, ReservationOrigin
+from app.models import Reservation, ReservationStatus, Property, Payments, Commercial
 from .serializers import ReservationSerializer, ReservationSerializer1, PaymentsSerializer, CommercialSerializer, PropertySerializer
 from rest_framework.response import Response
 import django_filters
@@ -18,6 +18,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from django.views import View
 
 # Función dedicada a cambiar el estado de una reserva
 @swagger_auto_schema(
@@ -45,12 +46,12 @@ from drf_yasg import openapi
             }
         ),
 
-        500: openapi.Response(
+        200: openapi.Response(
             description="Hubo un error",
             examples={
                 "application/json": {
                     "Data": {
-                        "status": "500",
+                        "status": 500,
                         "error": "hubo un error, no se pudo cambiar el estado"
                     }
                 }
@@ -82,6 +83,7 @@ def changeStatusReservation(request):
         respuesta = {'Data': {'status': status.HTTP_500_INTERNAL_SERVER_ERROR,
                               'error': 'hubo un error, no se pudo cambiar el estado'}}
     return Response(respuesta)
+
 # Clase para filtrar reservas con múltiples parámetros
 class ReservationFilter(django_filters.FilterSet):
     estatus = django_filters.BaseInFilter(field_name='estatus')
