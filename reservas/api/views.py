@@ -46,7 +46,7 @@ from django.views import View
             }
         ),
 
-        200: openapi.Response(
+        500: openapi.Response(
             description="Hubo un error",
             examples={
                 "application/json": {
@@ -69,6 +69,7 @@ def changeStatusReservation(request):
     objeto_reserva = ''
     data = request.data
     id_reservation = data['id']
+    status_response=status.HTTP_200_OK
     try:
         reservas = Reservation.objects.get(id=id_reservation)
         Estado_actual = reservas.estatus
@@ -77,12 +78,13 @@ def changeStatusReservation(request):
         nuevo_status = ReservationStatus.objects.get(nombre=objeto_reserva.estado)
         reservas.estatus = nuevo_status
         reservas.save()
-        respuesta = {'Data': {'status': status.HTTP_200_OK,
+        respuesta = {'Data': {'status': 200,
                               'nuevoEstado': reservas.estatus.nombre}}
     except:
-        respuesta = {'Data': {'status': status.HTTP_500_INTERNAL_SERVER_ERROR,
+        status_response=status.HTTP_500_INTERNAL_SERVER_ERROR
+        respuesta = {'Data': {'status': status_response,
                               'error': 'hubo un error, no se pudo cambiar el estado'}}
-    return Response(respuesta)
+    return Response(respuesta, status_response)
 
 # Clase para filtrar reservas con múltiples parámetros
 class ReservationFilter(django_filters.FilterSet):
