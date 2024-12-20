@@ -199,7 +199,6 @@ class ReservationList(generics.ListCreateAPIView):
         return Reservation.objects.none()  # Devuelve un queryset vacío
 
 # Función de búsqueda de un hueco o ventana de propiedades disponibles, dado un rango de fechas como parámetro principal
-# Función de búsqueda de un hueco o ventana de propiedades disponibles, dado un rango de fechas como parámetro principal
 class PropertiesList(generics.ListCreateAPIView):
     '''
         Main view to find a gap (space) betwen two dates and selected properties
