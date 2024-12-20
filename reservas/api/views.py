@@ -199,6 +199,7 @@ class ReservationList(generics.ListCreateAPIView):
         return Reservation.objects.none()  # Devuelve un queryset vacío
 
 # Función de búsqueda de un hueco o ventana de propiedades disponibles, dado un rango de fechas como parámetro principal
+# Función de búsqueda de un hueco o ventana de propiedades disponibles, dado un rango de fechas como parámetro principal
 class PropertiesList(generics.ListCreateAPIView):
     '''
         Main view to find a gap (space) betwen two dates and selected properties
@@ -208,6 +209,18 @@ class PropertiesList(generics.ListCreateAPIView):
     filter_backends = [DjangoFilterBackend]
     filterset_class = FreeReservationFilter
     http_method_names = ['get']
+    
+    def get(self, request, *args, **kwargs):
+        """
+        Handles GET requests for retrieving a list of reservations between two dates an multiple ids of properties
+        """
+        try:
+            return super().get(request, *args, **kwargs)
+        except Exception as e:
+            return Response(
+                {"error": "Internal Server Error. Please try again later."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 # Función de búsqueda de propiedades por id de comercios
 class GetProperties(generics.ListCreateAPIView):
