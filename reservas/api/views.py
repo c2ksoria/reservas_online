@@ -208,6 +208,18 @@ class PropertiesList(generics.ListCreateAPIView):
     filter_backends = [DjangoFilterBackend]
     filterset_class = FreeReservationFilter
     http_method_names = ['get']
+    
+    def get(self, request, *args, **kwargs):
+        """
+        Handles GET requests for retrieving a list of reservations between two dates an multiple ids of properties
+        """
+        try:
+            return super().get(request, *args, **kwargs)
+        except Exception as e:
+            return Response(
+                {"error": "Internal Server Error. Please try again later."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 # Función de búsqueda de propiedades por id de comercios
 class GetProperties(generics.ListCreateAPIView):
