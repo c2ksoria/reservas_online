@@ -192,6 +192,7 @@ class ReservationList(generics.ListCreateAPIView):
     filter_backends = [DjangoFilterBackend]
     filterset_class = ReservationFilter
     pagination_class = PageNumberPagination
+    http_method_names = ['get']
     
     def get_queryset(self):
         if self.request.query_params:  # Solo ejecutar la consulta si hay parámetros
