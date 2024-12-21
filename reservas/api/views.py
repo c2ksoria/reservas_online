@@ -208,7 +208,65 @@ class PropertiesList(generics.ListCreateAPIView):
     filter_backends = [DjangoFilterBackend]
     filterset_class = FreeReservationFilter
     http_method_names = ['get']
-    
+    @swagger_auto_schema(
+    operation_summary="Find a Gap of dates for multi properties, between a range of dates.",
+    operation_description="Get all reservations between two dates and id of properties",
+    manual_parameters=[
+            openapi.Parameter(
+                "propiedades",
+                openapi.IN_QUERY,
+                description=(
+                    "IDs of the properties to search for reservations. "
+                    "Accepts a single ID or multiple IDs separated by commas. "
+                    "Example: `1,2,3`."
+                ),
+                type=openapi.TYPE_STRING
+            ),
+            openapi.Parameter(
+                "fecha_prefijada",
+                openapi.IN_QUERY,
+                description=(
+                    "A predefined range of dates to filter reservations. "
+                    "Must be in the format `YYYY-MM-DD,YYYY-MM-DD`. "
+                    "Example: `2024-12-01,2024-12-15`."
+                ),
+                type=openapi.TYPE_STRING,
+            ),
+        ],
+    responses={
+        200: openapi.Response(
+            description="Query ok",
+            examples={
+                "application/json": [
+                        {
+                            "id": 673,
+                            "nombre_apellido": "Silvia",
+                            "fecha_ingreso": "2024-12-12",
+                            "hora_checkin": "13:00:00",
+                            "fecha_egreso": "2024-12-15",
+                            "hora_checkout": "11:00:00",
+                            "cantidad_personas": 2,
+                            "cantidad_noches": 3,
+                            "presupuesto_dolares": 89,
+                            "presupuesto_pesos": 0,
+                            "notas": ".",
+                            "origen_reserva": "Booking",
+                            "propiedad": "K1"
+                        },
+                ]
+            }
+        ),
+
+        500: openapi.Response(
+            description="Has been an error",
+            examples={
+                "application/json": {
+                "error": "Internal Server Error. Please try again later."
+                }
+            }
+        ),
+    }
+    )
     def get(self, request, *args, **kwargs):
         """
         Handles GET requests for retrieving a list of reservations between two dates an multiple ids of properties
