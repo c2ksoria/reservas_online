@@ -90,16 +90,16 @@ def changeStatusReservation(request):
 class ReservationFilter(django_filters.FilterSet):
     estatus = django_filters.BaseInFilter(field_name='estatus')
     nombre_apellido= django_filters.CharFilter(field_name='nombre_apellido', lookup_expr='icontains')
-    propiedad= django_filters.CharFilter(field_name='propiedad__nombre', lookup_expr='icontains')
-    fecha_ingreso_gte = filters.DateFilter(field_name='fecha_ingreso', lookup_expr='gte')
-    fecha_ingreso_lte = filters.DateFilter(field_name='fecha_ingreso', lookup_expr='lte')
-    fecha_ingreso = filters.DateFromToRangeFilter(field_name='fecha_ingreso')
+    # propiedad= django_filters.CharFilter(field_name='propiedad__nombre', lookup_expr='icontains')
+    # fecha_ingreso_gte = filters.DateFilter(field_name='fecha_ingreso', lookup_expr='gte')
+    # fecha_ingreso_lte = filters.DateFilter(field_name='fecha_ingreso', lookup_expr='lte')
+    # fecha_ingreso = filters.DateFromToRangeFilter(field_name='fecha_ingreso')
     fecha_prefijada = django_filters.CharFilter(method='filter_fecha_prefijada')
     comercio = django_filters.BaseInFilter(field_name='propiedad__comercio__id')
 
     class Meta:
         model = Reservation
-        fields = ['propiedad', 'comercio','origen_reserva', 'estatus', 'fecha_ingreso', 'fecha_egreso', 'nombre_apellido']
+        fields = ['comercio','estatus', 'nombre_apellido']
     
     # Filtro personalizado en base a las fechas con el formato: YYYY-MM-DD,YYYY-MM-DD
     def filter_fecha_prefijada(self, queryset, name, value):
