@@ -198,6 +198,18 @@ class ReservationList(generics.ListCreateAPIView):
         if self.request.query_params:  # Solo ejecutar la consulta si hay parámetros
             return Reservation.objects.all()
         return Reservation.objects.none()  # Devuelve un queryset vacío
+    
+    def get(self, request, *args, **kwargs):
+        """
+        Handles GET requests for retrieving a list of reservations, it was developed by been used on callendar frontend
+        """
+        try:
+            return super().get(request, *args, **kwargs)
+        except Exception as e:
+            return Response(
+                {"error": "Internal Server Error. Please try again later."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 # Función de búsqueda de un hueco o ventana de propiedades disponibles, dado un rango de fechas como parámetro principal
 class PropertiesList(generics.ListCreateAPIView):
