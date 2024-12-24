@@ -90,10 +90,6 @@ def changeStatusReservation(request):
 class ReservationFilter(django_filters.FilterSet):
     estatus = django_filters.BaseInFilter(field_name='estatus')
     nombre_apellido= django_filters.CharFilter(field_name='nombre_apellido', lookup_expr='icontains')
-    # propiedad= django_filters.CharFilter(field_name='propiedad__nombre', lookup_expr='icontains')
-    # fecha_ingreso_gte = filters.DateFilter(field_name='fecha_ingreso', lookup_expr='gte')
-    # fecha_ingreso_lte = filters.DateFilter(field_name='fecha_ingreso', lookup_expr='lte')
-    # fecha_ingreso = filters.DateFromToRangeFilter(field_name='fecha_ingreso')
     fecha_prefijada = django_filters.CharFilter(method='filter_fecha_prefijada')
     comercio = django_filters.BaseInFilter(field_name='propiedad__comercio__id')
 
@@ -201,7 +197,7 @@ class ReservationList(generics.ListCreateAPIView):
     
     def get(self, request, *args, **kwargs):
         """
-        Handles GET requests for retrieving a list of reservations, it was developed by been used on callendar frontend
+        Handles GET requests for retrieving a list of reservations, it was developed to been used on callendar frontend app
         """
         try:
             return super().get(request, *args, **kwargs)
