@@ -195,6 +195,89 @@ class ReservationList(generics.ListCreateAPIView):
             return Reservation.objects.all()
         return Reservation.objects.none()  # Devuelve un queryset vacío
     
+    @swagger_auto_schema(
+    operation_summary="Change Reservation Status",
+    operation_description="This endpoint allows you to change the status of a reservation based on its ID.",
+    manual_parameters=[
+            openapi.Parameter(
+                "propiedades",
+                openapi.IN_QUERY,
+                description=(
+                    "IDs of the properties to search for reservations. "
+                    "Accepts a single ID or multiple IDs separated by commas. "
+                    "Example: `1,2,3`."
+                ),
+                type=openapi.TYPE_STRING
+            ),
+            openapi.Parameter(
+                "fecha_prefijada",
+                openapi.IN_QUERY,
+                description=(
+                    "A predefined range of dates to filter reservations. "
+                    "Must be in the format `YYYY-MM-DD,YYYY-MM-DD`. "
+                    "Example: `2024-12-01,2024-12-15`."
+                ),
+                type=openapi.TYPE_STRING,
+            ),
+        ],
+    responses={
+        200: openapi.Response(
+            description="List of reservations filtered",
+            examples={
+                "application/json": [
+                    {
+                        "id": 652,
+                        "estatus": {
+                          "id": 2,
+                          "nombre": "Activa"
+                        },
+                        "origen_reserva": {
+                          "id": 2,
+                          "nombre": "Particular"
+                        },
+                        "propiedad": {
+                          "id": 27,
+                          "nombre": "RYC D5"
+                        },
+                        "pagos": [
+                          {
+                            "id": 542,
+                            "fecha_pago": "2024-10-07",
+                            "moneda_pago": "Pesos",
+                            "tipo_pago": "Transferencia",
+                            "monto": "38000.00",
+                            "comprobante": "http://localhost:8000/media/receipt/WhatsApp_Image_2024-10-08_at_11.38.03.jpeg",
+                            "verif_propietario": 'false',
+                            "fecha_verificacion": 'null',
+                            "reserva": 652
+                          }
+                        ],
+                        "nombre_apellido": "Omar Ortega",
+                        "fecha_ingreso": "2024-10-11",
+                        "hora_checkin": "18:00:00",
+                        "fecha_egreso": "2024-10-13",
+                        "hora_checkout": "11:00:00",
+                        "cantidad_personas": 2,
+                        "cantidad_noches": 2,
+                        "presupuesto_dolares": "0.00",
+                        "presupuesto_pesos": "76000.00",
+                        "notas": "."
+                    }
+                ]
+            }
+        ),
+
+        500: openapi.Response(
+            description="Hubo un error",
+            examples={
+                "application/json":
+                    {
+                    "error": "Internal Server Error. Please try again later."
+                }
+            }
+        ),
+    }
+)
     def get(self, request, *args, **kwargs):
         """
         Handles GET requests for retrieving a list of reservations, it was developed to been used on callendar frontend app
