@@ -13,15 +13,18 @@ from .forms import CreateFormReservation, CreateFormPayment
 from django.http import JsonResponse
 
 # Create your views here.
-# Función utilizada para probar los cambios de los estados
+# Función vista principal
 def index(request):
     return render(request, 'base.html')
 
+# Función vista para probar código
 def Test (request):
     reservas_en_curso()
+    reservas_del_dia()
     testTransition()
     return JsonResponse ({"msj": "Test Finalizado"}, status=200)
 
+# Función para probar las transiciones
 def testTransition():
     estado = Estados('Presupuesto')
     print(estado.estado)
@@ -30,15 +33,15 @@ def testTransition():
     estado.transicion('Checkin Ok')
     print(estado.estado)
     estado.transicion('Finalizar')
-    
     print(estado.estado)
 
+# Función Vista utilizada para visualizar las reservas
 class ReservationList(ListView):
     model = Reservation
     # template_name: 'reservation_list.html'
     context_object_name: 'reserva'
 
-
+# Función vista reservada para crear Reservas
 class ReservaCreateView(CreateView):
     model = Reservation
     # fields = '__all__'  # campos a incluir en el formulario
@@ -163,7 +166,7 @@ def Formulario_update_reserva(request, pk):
         return JsonResponse(response_data, status=405)
 
 def Formulario_nuevo_pago(request):
-    print("------Formulario_nuevo_pago---------")
+    # print("------Formulario_nuevo_pago---------")
     if request.method == 'GET':
 
         try:

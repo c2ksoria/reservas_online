@@ -8,75 +8,94 @@ from django_filters import rest_framework as filters
 from django.db.models import Q
 
 from app.views import Estados
-
-# from django.shortcuts import render
-# from app.forms import CreateFormReservation
 from django.views.decorators.csrf import csrf_protect
 from django.http import JsonResponse
-# import json
-
 from rest_framework import generics
-from django.db.models import Sum
-
 from rest_framework import status
-# from django.views.decorators.csrf import csrf_exempt
-# from django.http import HttpResponse
+from rest_framework.views import  APIView
 from datetime import datetime
-# from django.core import serializers
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.pagination import PageNumberPagination
-# from django.forms.models import model_to_dict
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 from django.views import View
 
-from app.logging import mostrar
-
-@api_view(['GET'])
-def getData(request):
-    serializer_context = {
-        'request': request,
-    }
-    reservas = Reservation.objects.all()
-    serializer = ReservationSerializer1(
-        reservas, many=True, context=serializer_context)
-
-    return Response(serializer.data)
-
 # Función dedicada a cambiar el estado de una reserva
+@swagger_auto_schema(
+    method='put',
+    operation_summary="Change Reservation Status",
+    operation_description="This endpoint allows you to change the status of a reservation based on its ID.",
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'id': openapi.Schema(type=openapi.TYPE_INTEGER, description='Reservation ID'),
+            'accion': openapi.Schema(type=openapi.TYPE_STRING, description='Action to perform (Activar, Cancelar, Checkin Ok, Suspender, Finalizar)')
+        },
+        required=['id', 'accion']
+    ),
+    responses={
+        200: openapi.Response(
+            description="Status changed successfully",
+            examples={
+                "application/json": {
+                    "Data": {
+                        "status": 200,
+                        "nuevoEstado": "Activa"
+                    }
+                }
+            }
+        ),
+
+        500: openapi.Response(
+            description="Hubo un error",
+            examples={
+                "application/json": {
+                    "Data": {
+                        "status": 500,
+                        "error": "hubo un error, no se pudo cambiar el estado"
+                    }
+                }
+            }
+        ),
+    }
+)
 @api_view(['PUT'])
 def changeStatusReservation(request):
+    '''
+        This view can change status of reservations by id
+    '''
     respuesta = ""
     Estado_actual = ''
     objeto_reserva = ''
     data = request.data
     id_reservation = data['id']
+    status_response=status.HTTP_200_OK
     try:
         reservas = Reservation.objects.get(id=id_reservation)
         Estado_actual = reservas.estatus
         objeto_reserva = Estados(Estado_actual.nombre)
         objeto_reserva.transicion(data['accion'])
-        status = ReservationStatus.objects.get(nombre=objeto_reserva.estado)
-        reservas.estatus = status
+        nuevo_status = ReservationStatus.objects.get(nombre=objeto_reserva.estado)
+        reservas.estatus = nuevo_status
         reservas.save()
         respuesta = {'Data': {'status': 200,
                               'nuevoEstado': reservas.estatus.nombre}}
     except:
-        respuesta = {'Data': {'status': 500,
+        status_response=status.HTTP_500_INTERNAL_SERVER_ERROR
+        respuesta = {'Data': {'status': status_response,
                               'error': 'hubo un error, no se pudo cambiar el estado'}}
-    return Response(respuesta)
+    return Response(respuesta, status_response)
+
 # Clase para filtrar reservas con múltiples parámetros
 class ReservationFilter(django_filters.FilterSet):
     estatus = django_filters.BaseInFilter(field_name='estatus')
     nombre_apellido= django_filters.CharFilter(field_name='nombre_apellido', lookup_expr='icontains')
-    propiedad= django_filters.CharFilter(field_name='propiedad__nombre', lookup_expr='icontains')
-    fecha_ingreso_gte = filters.DateFilter(field_name='fecha_ingreso', lookup_expr='gte')
-    fecha_ingreso_lte = filters.DateFilter(field_name='fecha_ingreso', lookup_expr='lte')
-    fecha_ingreso = filters.DateFromToRangeFilter(field_name='fecha_ingreso')
     fecha_prefijada = django_filters.CharFilter(method='filter_fecha_prefijada')
     comercio = django_filters.BaseInFilter(field_name='propiedad__comercio__id')
 
     class Meta:
         model = Reservation
-        fields = ['propiedad', 'comercio','origen_reserva', 'estatus', 'fecha_ingreso', 'fecha_egreso', 'nombre_apellido']
+        fields = ['comercio','estatus', 'nombre_apellido']
     
     # Filtro personalizado en base a las fechas con el formato: YYYY-MM-DD,YYYY-MM-DD
     def filter_fecha_prefijada(self, queryset, name, value):
@@ -101,10 +120,7 @@ class ReservationFilter(django_filters.FilterSet):
 
 # Filtro utilizado para buscar hueco en rango de fechas
 class FreeReservationFilter(django_filters.FilterSet):
-    fecha_inicio = django_filters.DateFilter(field_name='fecha_ingreso', lookup_expr='lte')
-    fecha_fin = django_filters.DateFilter(field_name='fecha_egreso', lookup_expr='gte')
     propiedades = django_filters.CharFilter(field_name='propiedad__id', method='filter_propiedades')
-    comercios = django_filters.CharFilter(field_name='propiedad__comercio__id', method='filter_comercios')
     fecha_prefijada = django_filters.CharFilter(method='filter_fecha_prefijada')
     # Filtro de propiedades por id
     def filter_propiedades(self, queryset, name, value):
@@ -162,28 +178,215 @@ class CustomPagination(PageNumberPagination):
 
 # Función de búsqueda de reservas
 class ReservationList(generics.ListCreateAPIView):
+    '''
+        This view show a list of reservations, it can filter by property name,
+        propierty id (multiple), origin reservation, status (multiple), date of checkin,
+        date of checkout and name (it contains).
+    '''
     queryset = Reservation.objects.all()
     serializer_class = ReservationSerializer1
     filter_backends = [DjangoFilterBackend]
     filterset_class = ReservationFilter
     pagination_class = PageNumberPagination
+    http_method_names = ['get']
+    
+    def get_queryset(self):
+        if self.request.query_params:  # Solo ejecutar la consulta si hay parámetros
+            return Reservation.objects.all()
+        return Reservation.objects.none()  # Devuelve un queryset vacío
+    
+    @swagger_auto_schema(
+    operation_summary="Change Reservation Status",
+    operation_description="This endpoint allows you to change the status of a reservation based on its ID.",
+    manual_parameters=[
+            openapi.Parameter(
+                "propiedades",
+                openapi.IN_QUERY,
+                description=(
+                    "IDs of the properties to search for reservations. "
+                    "Accepts a single ID or multiple IDs separated by commas. "
+                    "Example: `1,2,3`."
+                ),
+                type=openapi.TYPE_STRING
+            ),
+            openapi.Parameter(
+                "fecha_prefijada",
+                openapi.IN_QUERY,
+                description=(
+                    "A predefined range of dates to filter reservations. "
+                    "Must be in the format `YYYY-MM-DD,YYYY-MM-DD`. "
+                    "Example: `2024-12-01,2024-12-15`."
+                ),
+                type=openapi.TYPE_STRING,
+            ),
+        ],
+    responses={
+        200: openapi.Response(
+            description="List of reservations filtered",
+            examples={
+                "application/json": [
+                    {
+                        "id": 652,
+                        "estatus": {
+                          "id": 2,
+                          "nombre": "Activa"
+                        },
+                        "origen_reserva": {
+                          "id": 2,
+                          "nombre": "Particular"
+                        },
+                        "propiedad": {
+                          "id": 27,
+                          "nombre": "RYC D5"
+                        },
+                        "pagos": [
+                          {
+                            "id": 542,
+                            "fecha_pago": "2024-10-07",
+                            "moneda_pago": "Pesos",
+                            "tipo_pago": "Transferencia",
+                            "monto": "38000.00",
+                            "comprobante": "http://localhost:8000/media/receipt/WhatsApp_Image_2024-10-08_at_11.38.03.jpeg",
+                            "verif_propietario": 'false',
+                            "fecha_verificacion": 'null',
+                            "reserva": 652
+                          }
+                        ],
+                        "nombre_apellido": "Omar Ortega",
+                        "fecha_ingreso": "2024-10-11",
+                        "hora_checkin": "18:00:00",
+                        "fecha_egreso": "2024-10-13",
+                        "hora_checkout": "11:00:00",
+                        "cantidad_personas": 2,
+                        "cantidad_noches": 2,
+                        "presupuesto_dolares": "0.00",
+                        "presupuesto_pesos": "76000.00",
+                        "notas": "."
+                    }
+                ]
+            }
+        ),
+
+        500: openapi.Response(
+            description="Hubo un error",
+            examples={
+                "application/json":
+                    {
+                    "error": "Internal Server Error. Please try again later."
+                }
+            }
+        ),
+    }
+)
+    def get(self, request, *args, **kwargs):
+        """
+        Handles GET requests for retrieving a list of reservations, it was developed to been used on callendar frontend app
+        """
+        try:
+            return super().get(request, *args, **kwargs)
+        except Exception as e:
+            return Response(
+                {"error": "Internal Server Error. Please try again later."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
 # Función de búsqueda de un hueco o ventana de propiedades disponibles, dado un rango de fechas como parámetro principal
 class PropertiesList(generics.ListCreateAPIView):
+    '''
+        Main view to find a gap (space) betwen two dates and selected properties
+    '''
     serializer_class = ReservationSerializer
     queryset = Reservation.objects.all()
     filter_backends = [DjangoFilterBackend]
     filterset_class = FreeReservationFilter
+    http_method_names = ['get']
+    @swagger_auto_schema(
+    operation_summary="Find a Gap of dates for multi properties, between a range of dates.",
+    operation_description="Get all reservations between two dates and id of properties",
+    manual_parameters=[
+            openapi.Parameter(
+                "propiedades",
+                openapi.IN_QUERY,
+                description=(
+                    "IDs of the properties to search for reservations. "
+                    "Accepts a single ID or multiple IDs separated by commas. "
+                    "Example: `1,2,3`."
+                ),
+                type=openapi.TYPE_STRING
+            ),
+            openapi.Parameter(
+                "fecha_prefijada",
+                openapi.IN_QUERY,
+                description=(
+                    "A predefined range of dates to filter reservations. "
+                    "Must be in the format `YYYY-MM-DD,YYYY-MM-DD`. "
+                    "Example: `2024-12-01,2024-12-15`."
+                ),
+                type=openapi.TYPE_STRING,
+            ),
+        ],
+    responses={
+        200: openapi.Response(
+            description="Query ok",
+            examples={
+                "application/json": [
+                        {
+                            "id": 673,
+                            "nombre_apellido": "Silvia",
+                            "fecha_ingreso": "2024-12-12",
+                            "hora_checkin": "13:00:00",
+                            "fecha_egreso": "2024-12-15",
+                            "hora_checkout": "11:00:00",
+                            "cantidad_personas": 2,
+                            "cantidad_noches": 3,
+                            "presupuesto_dolares": 89,
+                            "presupuesto_pesos": 0,
+                            "notas": ".",
+                            "origen_reserva": "Booking",
+                            "propiedad": "K1"
+                        },
+                ]
+            }
+        ),
 
-# Función de búsqueda de propiedades
+        500: openapi.Response(
+            description="Has been an error",
+            examples={
+                "application/json": {
+                "error": "Internal Server Error. Please try again later."
+                }
+            }
+        ),
+    }
+    )
+    def get(self, request, *args, **kwargs):
+        """
+        Handles GET requests for retrieving a list of reservations between two dates an multiple ids of properties
+        """
+        try:
+            return super().get(request, *args, **kwargs)
+        except Exception as e:
+            return Response(
+                {"error": "Internal Server Error. Please try again later."},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+# Función de búsqueda de propiedades por id de comercios
 class GetProperties(generics.ListCreateAPIView):
+    '''
+        View to filter all properties from ids of comercios
+    '''
     serializer_class = PropertySerializer
     queryset = Property.objects.all()
     filter_backends = [DjangoFilterBackend]
     filterset_class = PropertyFilter
+    http_method_names = ['get']
 
 # Función a utilizar para búsqueda de reservas teniendo en cuenta resultados paginados            
 class ReservationListPagination(generics.ListCreateAPIView):
+    '''
+        View of reservations objects with pagination
+    '''
     queryset = Reservation.objects.all()
     serializer_class = ReservationSerializer1
     filter_backends = [DjangoFilterBackend]
@@ -192,68 +395,113 @@ class ReservationListPagination(generics.ListCreateAPIView):
 
 # Función para la creación de reservas
 class CreateReservation(generics.CreateAPIView):
-        serializer_class = ReservationSerializer
-
-        def create(self, request, *args, **kwargs):
-            serializer = self.get_serializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-            self.perform_create(serializer)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        def perform_create(self, serializer):
+    """
+        This view can make new reservations.
+    """
+    serializer_class = ReservationSerializer
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    def perform_create(self, serializer):
             instance = serializer.save()
 
 # Función para actualizar una reserva
 class UpdateReservation(generics.RetrieveUpdateDestroyAPIView):
-        queryset = Reservation.objects.all()
-        serializer_class = ReservationSerializer
+    """
+        This view can update and delete exist reservation.
+    """
+    queryset = Reservation.objects.all()
+    serializer_class = ReservationSerializer
+    http_method_names = ['get', 'put']
+
+# Filtro de pagos
+class PaymentsFilter(django_filters.FilterSet):
+    reserva = django_filters.NumberFilter(field_name='reserva', label='Reservation ID')
+    # Filtro por id de reserva
+    class Meta:
+        model = Payments
+        fields = ['reserva']  # Agrega otros campos que desees filtrar en el modelo Property
 
 # Función para listar pagos en base a un id
 class PaymentsList(generics.ListCreateAPIView):
+        '''
+            View that show payments relatives to one reservation
+        '''
         queryset = Payments.objects.all()
         serializer_class = PaymentsSerializer
-        def get_queryset(self,  *args, **kwargs) :
-            return (
-            super()
-            .get_queryset(*args, **kwargs)
-            .filter(reserva=self.kwargs['pk'])
-        )
-# Función para crear pagos y asociarlos a una reserva
-class CreatePayments(generics.CreateAPIView):
-        serializer_class = PaymentsSerializer
+        filter_backends = [DjangoFilterBackend]
+        filterset_class = PaymentsFilter
+        def get_queryset(self, *args, **kwargs):
+            # Filtrar por el ID si está en los parámetros de consulta
+            payment_id = self.request.query_params.get('reserva')
+            if payment_id:
+                return Payments.objects.filter(reserva=payment_id)
+            # Si no hay ID, devuelve todos los pagos
+            return Payments.objects.none()
 
 # Función para filtrar comercios
 class ListCommercial(generics.ListCreateAPIView):
+    '''
+        This view show all commercial companies
+    '''
     queryset = Commercial.objects.all()
     serializer_class = CommercialSerializer
+    http_method_names = ['get']
 
 # Función para filtrar propiedades
 class PropertyList(generics.ListCreateAPIView):
+    '''
+        This view show all properties
+    '''
     queryset = Property.objects.all()
     serializer_class = PropertySerializer
 
-# Recaudación
-@api_view(['GET'])
-def Montos(request):
-    # Obtener info principal
-    idcomercio = request.GET.get('idCommercial')
-    mes_actual = request.GET.get('idMes')
-    idestatus = request.GET.get('idEstatus')
-    año_actual = request.GET.get('anio')
-    split = idestatus.split(',')
-    # Construir la consulta utilizando la función Q
-    consulta_estatus = Q()
-    for estatus in split:
-        consulta_estatus |= Q(estatus__id=estatus)
-    # Consulta
-    reservas = Reservation.objects.filter(consulta_estatus,fecha_ingreso__month=mes_actual, fecha_ingreso__year=año_actual, propiedad__comercio__id=idcomercio).prefetch_related('pagos')
-    # Serializar utilizando un serializer secundario
-    serialized_data=ReservationSerializer1(reservas, many=True).data
-    return JsonResponse(serialized_data, safe=False)
+# Filtro para calcular montos
+class MontosFilter(django_filters.FilterSet):
+    estatus = django_filters.BaseInFilter(field_name='estatus')
+    comercios = django_filters.BaseInFilter(field_name='propiedad__comercio__id')
+    anio = django_filters.NumberFilter(
+        field_name='fecha_ingreso',
+        lookup_expr='year',  # Filtra por el año
+        label="Año"
+    )
+    mes = django_filters.NumberFilter(
+        field_name='fecha_ingreso',
+        lookup_expr='month',  # Filtra por el mes
+        label="Mes"
+    )
+
+    class Meta:
+        model = Reservation
+        fields = ['estatus', 'comercios', 'anio', 'mes']
+
+class MontosList(generics.ListCreateAPIView):
+    """
+        This view should return a list reservations and all the payments relatives to it.
+    """
+    name = "Amount List"
+    queryset = Reservation.objects.prefetch_related('pagos')  # Optimiza las consultas con prefetch_related
+    serializer_class = ReservationSerializer1
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = MontosFilter
+
+    class Meta:
+        model = Reservation
+        fields = ['propiedad', 'comercios','origen_reserva', 'estatus', 'fecha_ingreso', 'fecha_egreso', 'nombre_apellido']
+
+    def get_queryset(self):
+        if self.request.query_params:  # Solo ejecutar la consulta si hay parámetros
+            return Reservation.objects.all()
+        return Reservation.objects.none()  # Devuelve un queryset vacío
 
 # Función de duplicado de reserva basada en un id como parámetro
-class DuplicateReservationView(View):
-    def get(self, request, reservation_id):
+class DuplicateReservationView(APIView):
+    '''
+        This view can duplicate a reservation by id
+    '''
+    def post(self, request, reservation_id):
         try:
             # Obtén la reserva original que deseas duplicar
             original_reservation = Reservation.objects.get(id=reservation_id)
@@ -274,4 +522,15 @@ class DuplicateReservationView(View):
             return JsonResponse(response_data)
 
         except Reservation.DoesNotExist:
-            return JsonResponse({"error": "Reserva no encontrada"}, status=404)
+            return JsonResponse({"error": "Reserva no encontrada"}, status=status.HTTP_404_NOT_FOUND)
+    def get(self, request, reservation_id=None):
+        """
+        This method show how to works the duplicated function
+        """
+        return Response({
+            "description": "Use this endpoint to duplicate reservations.",
+            "usage": "Send a POST request to /api/reservations/<reservation_id>/duplicate/",
+            "example": {
+                "curl": "curl -X POST http://127.0.0.1:8000/api/reservations/1/duplicate/"
+            }
+        })
