@@ -59,7 +59,8 @@ El siguiente comando inicializa los contenedores de la aplicación y la bae de d
 El archivo vacío `.initialized` se crea en la primera inicialización de los contenedores, es decir que cuando está presente hubo una inicialización de contenedores previa.
 Utiliza los siguinetes comandos para eliminar los contenedores (esto borra toda la base de datos también) y el archivo `.initialized`:
 
-```docker-compose down -v
+```
+docker-compose down -v
 rm .initialized
 ```
 
