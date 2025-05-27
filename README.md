@@ -1,5 +1,7 @@
-Api rest de software para utilizar como Gestor de reservas Hoteleras, se pueden crear múltiples propiedades y múltiples comercios.
-Las caraterísticas más generales son:
+# Gestión de reservas Hoteleras (API REST)
+Api rest de software para utilizar como Gestor de reservas Hoteleras, se pueden crear múltiples propiedades y múltiples comercios. Se pueden docuemntar "Reservas Hoteleras", con fechas y datos relevantes a la misma. Posee un Buscador de reservas, Visualizador de tipo Calendario y un resumen mensual de los ingresos monerarios.
+
+## Caraterísticas generales
 
 - Acceso a interfase admin para visualizar todos los modelos (http://localhost:8000/admin/).
 - ABM de entidades comerciales que pueden tener más de una propiedad asociada.
@@ -7,7 +9,7 @@ Las caraterísticas más generales son:
 - Creación de Reservas, se puede crear, modificar y cambiar de estado cada reserva.
 - Se pueden Almacenar los pagos, adjuntando un comprobante de tipo imagen.
 
-Las caracterpisticas particulares son:
+## Caracterpisticas particulares
 
 - Obtener todas las reservas desde la base de datos.
 - Cambiar los estados de cada reserva.
@@ -25,8 +27,9 @@ Las caracterpisticas particulares son:
 Carpeta de almacenamiento de recibos de pagos: /reservas/media/receipt
 
 
-# Instalación:
-## Requisitos previos
+## Instalación
+### Requisitos previos
+Docker y Docker-compose instalados.
 
 ### Configuración del variables de entorno
 Debes crear un archivo `.env` que luzca como el siguiente:
@@ -64,19 +67,19 @@ docker-compose down -v
 rm .initialized
 ```
 
-### Comprobacioness
+### Comprobaciones
 Comprueba que los contenedores esstán arriba:
 
 ```docker-compose ps
    docker-compose logs
 ```
 
-##Accede a la api-rest:
+### Acceder a la api-rest
 
 [API REST](http://localhost:8000/swagger)
 
-## Accede al entorno de administración:
-Se requieren credenciales, pero puedes ingresar con los datos de superusuario
+### Acceder al entorno de administración:
+Se requieren credenciales, pero puedes ingresar con los datos de superusuario.
 
 [Interfase de administración](http://localhost:8000/admin)
 
