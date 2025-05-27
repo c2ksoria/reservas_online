@@ -1,0 +1,1 @@
+[{"model": "app.paymentstype", "pk": 1, "fields": {"nombre": "Efectivo", "detalle": "Dinero en efectivo"}}, {"model": "app.paymentstype", "pk": 2, "fields": {"nombre": "Transferencia", "detalle": "Dinero trasnferido via Digital"}}]

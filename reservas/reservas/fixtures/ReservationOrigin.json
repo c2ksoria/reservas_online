@@ -1,0 +1,1 @@
+[{"model": "app.reservationorigin", "pk": 1, "fields": {"nombre": "Particular", "Detalle": "Es un Alquiler Particular"}}, {"model": "app.reservationorigin", "pk": 2, "fields": {"nombre": "AirBnb", "Detalle": "Es un Alquiler que proviene de Airbnb"}}, {"model": "app.reservationorigin", "pk": 3, "fields": {"nombre": "Booking", "Detalle": "Es un Alquiler que proviene de Booking"}}]

@@ -1,0 +1,1 @@
+[{"model": "app.commercial", "pk": 1, "fields": {"nombre": "Kupal", "direccion": "0", "url_google": "0", "coord_lat": "0", "coord_lon": "0", "detalle": "0"}}, {"model": "app.commercial", "pk": 2, "fields": {"nombre": "Hotel", "direccion": "0", "url_google": "0", "coord_lat": "0", "coord_lon": "0", "detalle": "0"}}]

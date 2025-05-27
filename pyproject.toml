@@ -5,17 +5,19 @@ description = "soft web para reserva online de hospedajes temporales"
 authors = ["Carlos Valdemar Soria <carlosvsoria1982@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.9"
 Django = "^4.1.7"
-Pillow = "^9.4.0"
+Pillow = "^11.2.1"
 django-widget-tweaks = "^1.4.12"
 django-bootstrap-datepicker-plus = "^5.0.3"
 django-bootstrap4 = "^22.3"
 django-jquery = "^3.1.0"
 djangorestframework = "^3.14.0"
-install = "^1.3.5"
 django-cors-headers = "^3.14.0"
 django-filter = "^23.2"
+python-decouple = "^3.8"
+drf-yasg = "^1.21.10"
+psycopg2-binary = "^2.9.10"
 
 [tool.poetry.dev-dependencies]
 

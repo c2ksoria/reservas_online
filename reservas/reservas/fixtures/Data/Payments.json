@@ -1,0 +1,1 @@
+[{"model": "app.payments", "pk": 1, "fields": {"reserva": 1, "fecha_pago": "2025-05-27", "moneda_pago": "Pesos", "tipo_pago": "Efectivo", "monto": "6000.00", "comprobante": "", "verif_propietario": false, "fecha_verificacion": null}}]

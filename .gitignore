@@ -7,3 +7,5 @@ reservas/members/migrations/
 reservas/reservas/__pycache__/
 reservas/api/__pycache__/
 reservas/logs/
+.env
+.initialized
