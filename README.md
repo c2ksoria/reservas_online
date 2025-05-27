@@ -23,3 +23,59 @@ Las caracterpisticas particulares son:
 - Función de filtrado de reservas por año, mes, comercio y estatus de reserva, para obtener el resumen mensual de reservas (Recaudación)
 
 Carpeta de almacenamiento de recibos de pagos: /reservas/media/receipt
+
+
+# Instalación:
+## Requisitos previos
+
+### Configuración del variables de entorno
+Debes crear un archivo `.env` que luzca como el siguiente:
+
+```
+# Variables de entorno para Django
+DEBUG=True
+SECRET_KEY=tu-clave-secreta-super-segura
+DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+
+# Variables para PostgreSQL
+POSTGRES_DB=db_name
+POSTGRES_USER=postgres_user
+POSTGRES_PASSWORD=postgres_password
+POSTGRES_HOST=db
+POSTGRES_PORT=db_port
+
+DB_HOST=reservas_db
+
+# Variables de django
+DJANGO_SUPERUSER_USERNAME=super_user_name
+DJANGO_SUPERUSER_PASSWORD=super_user_passwor
+DJANGO_SUPERUSER_EMAIL=super_user_email
+```
+## Start
+El siguiente comando inicializa los contenedores de la aplicación y la bae de datos, además graba algunas tablas con datos referidos a la aplicación y otros con algunos ejemplos:
+
+`docker-compose up --build`
+
+El archivo vacío `.initialized` se crea en la primera inicialización de los contenedores, es decir que cuando está presente hubo una inicialización de contenedores previa.
+Utiliza los siguinetes comandos para eliminar los contenedores (esto borra toda la base de datos también) y el archivo `.initialized`:
+
+```docker-compose down -v
+rm .initialized
+```
+
+### Comprobacioness
+Comprueba que los contenedores esstán arriba:
+
+```docker-compose ps
+   docker-compose logs
+```
+
+##Accede a la api-rest:
+
+[API REST](http://localhost:8000/swagger)
+
+## Accede al entorno de administración:
+Se requieren credenciales, pero puedes ingresar con los datos de superusuario
+
+[Interfase de administración](http://localhost:8000/admin)
+
