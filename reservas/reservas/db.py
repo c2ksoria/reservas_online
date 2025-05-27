@@ -1,14 +1,12 @@
 import os
 
-BASE_DIR=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
 POSTGRESSQL = {
-    'default':{
+    'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'xx1',
-        'USER': 'postgres',
-        'PASSWORD' : 'postgres',
-        'HOST': 'localhost',
-        'PORT': 5432
+        'NAME': os.getenv('POSTGRES_DB'),
+        'USER': os.getenv('POSTGRES_USER'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'HOST': os.getenv('POSTGRES_HOST', 'reservas_db'),  # o 'db' en Docker
+        'PORT': os.getenv('POSTGRES_PORT', 5432),
     }
 }
